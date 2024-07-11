@@ -62,12 +62,8 @@ cost of any service and repair.
 */
 #include <iostream>
 #include <cstring>
-#include <cstdio>
 #include "joint_overlay_client.h"
 #include "friLBRState.h"
-// Visual studio needs extra define to use math constants
-#define _USE_MATH_DEFINES
-#include <math.h>
 
 #include <QtCore/QByteArray>
 #include <QtCore/QDataStream>
@@ -169,22 +165,8 @@ void LBRJointCommandOverlayClient::command()
 
 	robotCommand().setJointPosition(&target_joint_values_[0]);
 
-	// Send current joint positions
-	QUdpSocket udp_socket;
-	QByteArray buffer;
-	QDataStream in(&buffer, QIODevice::WriteOnly);
-	for (const auto& joint_value : measured_joint_values_)
-	{
-		in << double(joint_value); //The cast to double is just a reminder
-	}
-	in << quint16(qChecksum(buffer));
-
-	QHostAddress host_address;
-	host_address.setAddress("192.168.1.88");
-	if (udp_socket.writeDatagram(buffer, host_address, 2222) == -1)
-	{
-		throw std::runtime_error("Error sending packet.");
-	}
+    //TODO Update ROS state with the current joint positions
+    //measured_joint_values_
 }
 //******************************************************************************
 // clean up additional defines

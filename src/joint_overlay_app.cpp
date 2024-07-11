@@ -108,14 +108,14 @@ void signal_handler(int signal)
 static QList<QLabel*> joint_value_list;
 void update_joint_value_list(const std::vector<double>& q)
 {
-	for (int i = 0; i < q.size(); i++)
+    for (size_t i = 0; i < q.size(); i++)
 		joint_value_list.at(i)->setText(QString::number(q.at(i)));
 }
 
 static QList<QLabel*> target_joint_value_list;
 void update_target_joint_value_list(const std::vector<double>& q_target)
 {
-	for (int i = 0; i < q_target.size(); i++)
+    for (size_t i = 0; i < q_target.size(); i++)
 	{
 		target_joint_value_list.at(i)->setText(QString::number(q_target.at(i)));
 		//target_joint_value_list.at(i)->setText("<b>"
@@ -128,11 +128,6 @@ void update_target_joint_value_list(const std::vector<double>& q_target)
 static QList<QLabel*> joint_name_list;
 static QList<QPushButton*> button_plus_list;
 static QList<QPushButton*> button_minus_list;
-
-static QUdpSocket* external_command_socket{ nullptr };
-static QString external_command_socket_bind_ip{"192.168.1.185"};
-static int external_command_socket_bind_port{2222};
-
 
 int main(int argc, char** argv)
 {
@@ -171,13 +166,13 @@ int main(int argc, char** argv)
 			this_line_layout->addWidget(joint_name_list.at(i));
 			this_line_layout->addWidget(joint_value_list.at(i));
 			this_line_layout->addWidget(target_joint_value_list.at(i));
-			QObject::connect(button_plus_list.at(i), &QPushButton::pressed, &frame, [&frame,i]()
+            QObject::connect(button_plus_list.at(i), &QPushButton::pressed, &frame, [i]()
 				{
 					auto current_joint_value = trafoClient->get_measured_joint_value(i);
 					trafoClient->set_target_joint_value(current_joint_value + 0.01, i);
 				});
 			this_line_layout->addWidget(button_plus_list.at(i));
-			QObject::connect(button_minus_list.at(i), &QPushButton::pressed, &frame, [&frame, i]()
+            QObject::connect(button_minus_list.at(i), &QPushButton::pressed, &frame, [i]()
 				{
 					auto current_joint_value = trafoClient->get_measured_joint_value(i);
 					trafoClient->set_target_joint_value(current_joint_value - 0.01, i);
@@ -189,57 +184,8 @@ int main(int argc, char** argv)
 		frame.setLayout(&main_layout);
 		frame.setVisible(true);
 
-		//External udp connection
-		external_command_socket = new QUdpSocket(&frame);
-		if (external_command_socket->bind(QHostAddress(external_command_socket_bind_ip), external_command_socket_bind_port))
-		{
-			std::cout << "Listening to external commands at "
-				<< external_command_socket_bind_ip.toStdString()
-				<< ":"
-				<< external_command_socket_bind_port
-				<< std::endl;
-
-			QObject::connect(external_command_socket, &QUdpSocket::readyRead, &frame, [&frame]()
-				{
-					QByteArray buffer;
-					buffer.resize(external_command_socket->pendingDatagramSize());
-
-					QHostAddress sender_ip;
-					quint16 sender_port;
-					external_command_socket->readDatagram(buffer.data(), buffer.size(), &sender_ip, &sender_port);
-
-					QDataStream in(&buffer, QIODevice::ReadOnly);
-
-					std::vector<double> external_command_values;
-					external_command_values.resize(7, 0.0);
-					quint16 crc16_from_sender;
-
-					for (double& external_command_value : external_command_values)
-					{
-						in >> external_command_value;
-					}
-					std::cout << std::endl;
-					in >> crc16_from_sender;
-
-					//Check CRC16
-					quint16 crc16 = qChecksum(buffer, buffer.size() - 2);
-					if (crc16_from_sender != crc16)
-					{
-						std::cout << "CRC16 mismatch, ignoring message." << std::endl;
-						std::cout << "CRC16 (sender) " << crc16_from_sender << std::endl;
-						std::cout << "CRC16 (receiver) " << crc16 << std::endl;
-						return;
-					}
-
-					//TODO actually command the joint values here, let the sanity check be done within
-					//the class that commands it in low level.
-					//std::cout << "Got message" << std::endl;
-					trafoClient->set_target_joint_values(external_command_values);
-				});
-		}
-		else
-			std::cout << "Unable to bind to external command socket." << std::endl;
-
+        //TODO read ROS commands and turn them into commands like so
+        //trafoClient->set_target_joint_values(external_command_values);
 
 		qt_application->exec();
 
