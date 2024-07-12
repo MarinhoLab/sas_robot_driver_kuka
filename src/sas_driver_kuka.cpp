@@ -35,11 +35,18 @@ class RobotDriverKuka::Impl
 {
 public:
     std::shared_ptr<LBRJointCommandOverlayClient> trafo_client_;
+
+    Impl()
+    {
+        trafo_client_ = std::make_shared<LBRJointCommandOverlayClient>();
+    };
+
 };
 
 RobotDriverKuka::RobotDriverKuka(const RobotDriverKukaConfiguration& configuration, std::atomic_bool* break_loops):
 RobotDriver(break_loops)
 {
+    impl_ = std::make_unique<RobotDriverKuka::Impl>();
     joint_limits_ = configuration.joint_limits;
 }
 
@@ -60,12 +67,12 @@ void RobotDriverKuka::set_target_joint_positions(const VectorXd &desired_joint_p
 
 void RobotDriverKuka::connect()
 {
-    std::atomic_bool* connection_state = nullptr; //Unknown connection state
-    fri_thread_ = std::thread(communication_thread_loop, impl_->trafo_client_, break_loops_, connection_state);
+    std::atomic_bool connection_state(false); //Unknown connection state
+    fri_thread_ = std::thread(communication_thread_loop, impl_->trafo_client_, break_loops_, &connection_state);
 
     //We need the connection to be established before moving on.
     //However, we guarantee that this doesn't lock us with break_loops.
-    while (!(*break_loops_) && connection_state == nullptr)
+    while (!(*break_loops_) && !connection_state)
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
 
