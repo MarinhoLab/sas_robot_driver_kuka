@@ -64,8 +64,15 @@ cost of any service and repair.
 #define _KUKA_FRI_LBR_JOINT_COMMAND_OVERLAY_CLIENT_H
 
 #include "friLBRClient.h"
+#include <atomic>
+#include <memory>
 #include <vector>
 #include <functional>
+#include <mutex>
+#include <Eigen/Core>
+
+using namespace Eigen;
+
 
 /**
  * \brief Test client that can overlay interpolator joint positions with sine waves.
@@ -75,15 +82,8 @@ class LBRJointCommandOverlayClient : public KUKA::FRI::LBRClient
    
 public:
       
-   /**
-    * \brief Constructor.
-    * 
-    */
    LBRJointCommandOverlayClient() = default;
    
-   /** 
-    * \brief Destructor.
-    */
    ~LBRJointCommandOverlayClient();
    
    /**
@@ -99,22 +99,21 @@ public:
     */
    virtual void command();
 
-   std::vector<double> get_measured_joint_values() const;
-   double get_measured_joint_value(int index) const;
+   VectorXd get_measured_joint_values() const;
 
    using UpdateCallbackFunctionType = std::function<void(const std::vector<double>&) > ;
-   void set_joint_value_update_callback(const UpdateCallbackFunctionType& callback);
-   void set_target_joint_value_update_callback(const UpdateCallbackFunctionType& callback);
-   void set_target_joint_value(const double& q, int index);
-   void set_target_joint_values(const std::vector<double>& q);
+   void set_target_joint_values(const VectorXd &q);
       
 private:
    
    double _offset;         //!< offset for current interpolation step
    std::vector<double> measured_joint_values_;
+   mutable std::mutex mutex_measured_joint_values_;
+
    std::vector<double> target_joint_values_;
-   UpdateCallbackFunctionType joint_value_update_callback_ = nullptr;
-   UpdateCallbackFunctionType target_joint_value_update_callback_ = nullptr;
+   mutable std::mutex mutex_target_joint_values_;
 };
+
+int communication_thread_loop(std::shared_ptr<LBRJointCommandOverlayClient> trafo_client, std::atomic_bool* break_loops, std::atomic_bool *connection_established);
 
 #endif // _KUKA_FRI_LBR_JOINT_COMMAND_OVERLAY_CLIENT_H
