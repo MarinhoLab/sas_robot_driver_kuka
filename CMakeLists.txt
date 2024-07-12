@@ -5,13 +5,13 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-set(CMAKE_PREFIX_PATH $ENV{QT_PATH})
-
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(rclcpp REQUIRED)
 find_package(sas_core REQUIRED)
-find_package(Qt6 REQUIRED COMPONENTS Core)
+find_package(sas_common REQUIRED)
+find_package(sas_robot_driver REQUIRED)
 
 ####################################
 # CPP Shared Library Block [BEGIN] #
@@ -124,9 +124,16 @@ add_executable(${RCLCPP_LOCAL_BINARY_NAME}
 
     )
 
+ament_target_dependencies(${RCLCPP_LOCAL_BINARY_NAME}
+    rclcpp
+    sas_common
+    sas_core
+    sas_robot_driver
+
+)
+
 target_link_libraries(${RCLCPP_LOCAL_BINARY_NAME}
     ${PROJECT_NAME}
-    Qt6::Core
 
     )
 

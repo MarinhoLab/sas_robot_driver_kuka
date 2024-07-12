@@ -38,7 +38,9 @@ class DriverBcap;
 
 struct RobotDriverKukaConfiguration
 {
-    int port;
+    std::string name;
+    VectorXd initial_joint_positions;
+    std::tuple<VectorXd,VectorXd> joint_limits;
 };
 
 class RobotDriverKuka: public RobotDriver

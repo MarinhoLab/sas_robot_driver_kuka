@@ -1,124 +1,94 @@
-int main(void)
-{
-    return 0;
-}
-/**
+/*
+# Copyright (c) 2016-2024 Murilo Marques Marinho
+#
+#    This file is part of sas_robot_driver_kuka.
+#
+#    sas_robot_driver_kuka is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Lesser General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    sas_robot_driver_kuka is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Lesser General Public License for more details.
+#
+#    You should have received a copy of the GNU Lesser General Public License
+#    along with sas_robot_driver_kuka.  If not, see <https://www.gnu.org/licenses/>.
+#
+# ################################################################
+#
+#   Author: Murilo M. Marinho, email: murilomarinho@ieee.org
+#   Based on sas_robot_driver_example.cpp
+#
+# ################################################################*/
+#include <rclcpp/rclcpp.hpp>
+#include <sas_core/examples/sas_robot_driver_example.hpp>
+#include <sas_core/eigen3_std_conversions.hpp>
+#include <sas_robot_driver/sas_robot_driver_ros.hpp>
+#include <sas_common/sas_common.hpp>
+#include "sas_robot_driver_kuka/sas_robot_driver_kuka.hpp"
+#include <dqrobotics/utils/DQ_Math.h>
 
-#include <QtCore/QList>
-#include <QtCore/QByteArray>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QFrame>
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QHBoxLayout>
-#include <QtWidgets/QLabel>
-#include <QtNetwork/QUdpSocket>
-static QApplication* qt_application{nullptr};
-void signal_handler(int signal)
+/*********************************************
+ * SIGNAL HANDLER
+ * *******************************************/
+#include<signal.h>
+static std::atomic_bool kill_this_process(false);
+void sig_int_handler(int)
 {
-    std::cout << "Signal received" << std::endl;
-    if (signal == SIGINT)
-    {
-        kill_application = true;
-        std::cout << "Kill signal received" << std::endl;
-        if (qt_application != nullptr)
-            qt_application->quit();
-    }
+    kill_this_process = true;
 }
-
-// Qt Static Elements (TODO make a separate class)
-static QList<QLabel*> joint_value_list;
-void update_joint_value_list(const std::vector<double>& q)
-{
-    for (size_t i = 0; i < q.size(); i++)
-        joint_value_list.at(i)->setText(QString::number(q.at(i)));
-}
-
-static QList<QLabel*> target_joint_value_list;
-void update_target_joint_value_list(const std::vector<double>& q_target)
-{
-    for (size_t i = 0; i < q_target.size(); i++)
-    {
-        target_joint_value_list.at(i)->setText(QString::number(q_target.at(i)));
-        //target_joint_value_list.at(i)->setText("<b>"
-        //	+ QString::number(q_target.at(i))
-        //	+ QString("</b>")
-        //);
-    }
-}
-
-static QList<QLabel*> joint_name_list;
-static QList<QPushButton*> button_plus_list;
-static QList<QPushButton*> button_minus_list;
 
 int main(int argc, char** argv)
 {
-    signal(SIGINT, signal_handler);
+    if(signal(SIGINT, sig_int_handler) == SIG_ERR)
+    {
+        throw std::runtime_error("::Error setting the signal int handler.");
+    }
+
+    rclcpp::init(argc,argv,rclcpp::InitOptions(),rclcpp::SignalHandlerOptions::None);
+
+    auto node = std::make_shared<rclcpp::Node>("sas_robot_driver_kuka");
+
     try
     {
-        qt_application = new QApplication(argc,argv);
-        qt_application->setApplicationName("MMM_LBRJointCommandOverlay [build "
-                                           + QString("%1 %2").arg(__DATE__).arg(__TIME__)
-                                           + "]");
+        RCLCPP_INFO_STREAM_ONCE(node->get_logger(), "::Loading parameters from parameter server.");
 
-        std::thread fri_thread(main_fri, argc, argv);
+        sas::RobotDriverKukaConfiguration configuration;
+        node->get_parameter_or("robot_name",configuration.name,std::string("Kuka"));
 
-        //We need the trafoclient to exist before doing anything else
-        while (!trafoClient)
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::vector<double> joint_limits_min;
+        std::vector<double> joint_limits_max;
+        node->get_parameter_or("joint_limits_min",joint_limits_min,{-170,-120,-170,-120,-170,-120,-175});
+        node->get_parameter_or("joint_limits_max",joint_limits_max,{170,120,170,120,170,120,175});
+        configuration.joint_limits = {deg2rad(sas::std_vector_double_to_vectorxd(joint_limits_min)),
+                                      deg2rad(sas::std_vector_double_to_vectorxd(joint_limits_max))};
 
-        //GUI
-        QFrame frame;
-        QVBoxLayout main_layout;
-        for (int i = 0; i < 7; i++)
-        {
-            QHBoxLayout* this_line_layout = new QHBoxLayout();
+        sas::RobotDriverROSConfiguration robot_driver_ros_configuration;
+        node->get_parameter_or("thread_sampling_time_sec",robot_driver_ros_configuration.thread_sampling_time_sec,0.001);
+        robot_driver_ros_configuration.robot_driver_provider_prefix = node->get_name();
 
-            joint_value_list.append(new QLabel("*.**", &frame));
-            joint_value_list.at(i)->setMinimumSize(QSize(200, 20));
-            target_joint_value_list.append(new QLabel("*.**", &frame));
-            target_joint_value_list.at(i)->setMinimumSize(QSize(200, 20));
-            joint_name_list.append(new QLabel("q" + QString::number(i), &frame));
-            joint_name_list.at(i)->setMaximumSize(QSize(40, 40));
-            button_plus_list.append(new QPushButton("+", &frame));
-            button_plus_list.at(i)->setMaximumSize(QSize(40, 40));
-            button_minus_list.append(new QPushButton("-", &frame));
-            button_minus_list.at(i)->setMaximumSize(QSize(40, 40));
+        RCLCPP_INFO_STREAM_ONCE(node->get_logger(), "::Parameters OK.");
 
-            this_line_layout->addWidget(joint_name_list.at(i));
-            this_line_layout->addWidget(joint_value_list.at(i));
-            this_line_layout->addWidget(target_joint_value_list.at(i));
-            QObject::connect(button_plus_list.at(i), &QPushButton::pressed, &frame, [i]()
-                             {
-                                 auto current_joint_value = trafoClient->get_measured_joint_value(i);
-                                 trafoClient->set_target_joint_value(current_joint_value + 0.01, i);
-                             });
-            this_line_layout->addWidget(button_plus_list.at(i));
-            QObject::connect(button_minus_list.at(i), &QPushButton::pressed, &frame, [i]()
-                             {
-                                 auto current_joint_value = trafoClient->get_measured_joint_value(i);
-                                 trafoClient->set_target_joint_value(current_joint_value - 0.01, i);
-                             });
-            this_line_layout->addWidget(button_minus_list.at(i));
 
-            main_layout.addLayout(this_line_layout);
-        }
-        frame.setLayout(&main_layout);
-        frame.setVisible(true);
+        RCLCPP_INFO_STREAM_ONCE(node->get_logger(), "::Instantiating RobotDriverKuka.");
+        auto robot_driver_kuka = std::make_shared<sas::RobotDriverKuka>(configuration,
+                                                                              &kill_this_process);
 
-        //TODO read ROS commands and turn them into commands like so
-        //trafoClient->set_target_joint_values(external_command_values);
+        RCLCPP_INFO_STREAM_ONCE(node->get_logger(), "::Instantiating RobotDriverROS.");
+        sas::RobotDriverROS robot_driver_ros(node,
+                                             robot_driver_kuka,
+                                             robot_driver_ros_configuration,
+                                             &kill_this_process);
+        robot_driver_ros.control_loop();
 
-        qt_application->exec();
-
-        kill_application = true;
-        if (fri_thread.joinable())
-            fri_thread.join();
     }
     catch (const std::exception& e)
     {
-        std::cerr << "Unhandled exception " << e.what() << "." << std::endl;
+        RCLCPP_ERROR_STREAM_ONCE(node->get_logger(), std::string("::Exception::") + e.what());
     }
+
+    sas::display_signal_handler_none_bug_info(node);
     return 0;
 }
-**/

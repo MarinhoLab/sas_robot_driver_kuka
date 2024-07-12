@@ -40,6 +40,11 @@ public:
 RobotDriverKuka::RobotDriverKuka(const RobotDriverKukaConfiguration& configuration, std::atomic_bool* break_loops):
 RobotDriver(break_loops)
 {
+    joint_limits_ = configuration.joint_limits;
+}
+
+RobotDriverKuka::~RobotDriverKuka()
+{
 
 }
 
