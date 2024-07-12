@@ -102,10 +102,10 @@ int communication_thread_loop(std::shared_ptr<LBRJointCommandOverlayClient> traf
    if (!app.connect(port, hostname))
    {
        std::cout << "Unable to connect to KUKA Sunrise controller" << std::endl;
-       *break_loops = true;
-       *connection_established = false;
+       break_loops->store(true);
+       connection_established->store(false);
    }
-   *connection_established = true;
+   connection_established->store(true);
 
    // repeatedly call the step routine to receive and process FRI packets
    bool success = true;
@@ -121,8 +121,9 @@ int communication_thread_loop(std::shared_ptr<LBRJointCommandOverlayClient> traf
          break;
       }
    }
+   break_loops->store(true);
    //Kill everything else in case the loop is broken for another reason
-   raise(SIGINT);
+   //raise(SIGINT);
 
    // disconnect from controller
    app.disconnect();

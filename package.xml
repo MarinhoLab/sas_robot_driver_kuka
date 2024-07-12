@@ -12,6 +12,7 @@
   <depend>rclcpp</depend>
   <depend>sas_core</depend>
   <depend>sas_common</depend>
+  <depend>sas_robot_driver</depend>
 
 
   <test_depend>ament_lint_auto</test_depend>

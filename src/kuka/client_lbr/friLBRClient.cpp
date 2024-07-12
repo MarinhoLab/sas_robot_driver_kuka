@@ -80,7 +80,8 @@ LBRClient::~LBRClient()
 void LBRClient::onStateChange(ESessionState oldState, ESessionState newState)
 {
    // TODO: String converter function for states
-   printf("LBRiiwaClient state changed from %d to %d\n", oldState, newState);
+   //printf("LBRiiwaClient state changed from %d to %d\n", oldState, newState);
+   //M: Removed printf for better performance.
 }
 
 //******************************************************************************
