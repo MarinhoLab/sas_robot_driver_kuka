@@ -16,3 +16,12 @@ sudo apt update && sudo apt install ubuntu-advantage-tools
 sudo pro enable realtime-kernel
 ```
 
+Use the following command to double check thread scheduling. Please note that only the FRI communication thread is realtime scheduled.
+
+`ps -eLfc | grep FF`
+
+which outputs, among many others,
+
+`user   17545   17542   17559   15 FF   60 16:22 pts/1    00:00:21 /home/user/ros2_ws/install/sas_robot_driver_kuka/lib/sas_robot_driver_kuka/test_sas_driver_kuka`
+
+
