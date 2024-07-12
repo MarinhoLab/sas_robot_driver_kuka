@@ -1,4 +1,4 @@
-//Modified from the LBRJointSineOverlayApp by Kuka.
+//Heavily modified from the LBRJointSineOverlayApp by Kuka.
 //Author: Murilo M. Marinho
 //Email: murilo.marinho@manchester.ac.uk
 /**
@@ -64,112 +64,73 @@ cost of any service and repair.
 #include <cstring>
 #include "joint_overlay_client.h"
 #include "friLBRState.h"
-
-#include <QtCore/QByteArray>
-#include <QtCore/QDataStream>
-#include <QtCore/QIODevice>
-#include <QtNetwork/QUdpSocket>
-#include <QtNetwork/QHostAddress>
+#include <sas_core/eigen3_std_conversions.hpp>
 
 using namespace KUKA::FRI;
-
 constexpr bool VERBOSE = false;
-//******************************************************************************
 
-
-//******************************************************************************
 LBRJointCommandOverlayClient::~LBRJointCommandOverlayClient()
 {
 }
 
-//******************************************************************************
+
 void LBRJointCommandOverlayClient::onStateChange(ESessionState oldState, ESessionState newState)
 {
-	LBRClient::onStateChange(oldState, newState);
-	// (re)initialize sine parameters when entering Monitoring
-	switch (newState)
-	{
-	case MONITORING_READY:
-	{
-		_offset = 0.0;
-
-		break;
-	}
-	default:
-	{
-		break;
-	}
-	}
+    LBRClient::onStateChange(oldState, newState);
+    // (re)initialize sine parameters when entering Monitoring
+    switch (newState)
+    {
+    case MONITORING_READY:
+    {
+        //This is available in the original example but its need here is unclear.
+        _offset = 0.0;
+        break;
+    }
+    default:
+    {
+        break;
+    }
+    }
 }
 
-std::vector<double> LBRJointCommandOverlayClient::get_measured_joint_values() const
+VectorXd LBRJointCommandOverlayClient::get_measured_joint_values() const
 {
-	return measured_joint_values_;
+    std::lock_guard<std::mutex> lock(mutex_measured_joint_values_);
+    return sas::std_vector_double_to_vectorxd(measured_joint_values_);
 }
 
-double LBRJointCommandOverlayClient::get_measured_joint_value(int index) const
+void LBRJointCommandOverlayClient::set_target_joint_values(const VectorXd& q)
 {
-	return measured_joint_values_.at(index);
+    std::lock_guard<std::mutex> lock(mutex_target_joint_values_);
+    if (q.size() != 7)
+        throw std::runtime_error("Wrong vector size in set_target_joint_values");
+    target_joint_values_ = sas::vectorxd_to_std_vector_double(q);
 }
 
-void LBRJointCommandOverlayClient::set_joint_value_update_callback(const UpdateCallbackFunctionType& callback)
-{
-	joint_value_update_callback_ = callback;
-}
-
-void LBRJointCommandOverlayClient::set_target_joint_value_update_callback(const UpdateCallbackFunctionType& callback)
-{
-	target_joint_value_update_callback_ = callback;
-}
-
-void LBRJointCommandOverlayClient::set_target_joint_value(const double& q, int index)
-{
-	target_joint_values_.at(index) = q;
-}
-
-void LBRJointCommandOverlayClient::set_target_joint_values(const std::vector<double>& q)
-{
-	if (q.size() != 7)
-		throw std::runtime_error("Wrong vector size in set_target_joint_values");
-	target_joint_values_ = q;
-}
-
-//******************************************************************************
 void LBRJointCommandOverlayClient::command()
 {
-	double jointPos[LBRState::NUMBER_OF_JOINTS];
+    std::scoped_lock<std::mutex, std::mutex> lock(mutex_measured_joint_values_, mutex_target_joint_values_);
 
-	/// The original exmaple was with IpoJointPositions, but that did not work on mine.
-	// memcpy(jointPos, robotState().getIpoJointPosition(), LBRState::NUMBER_OF_JOINTS * sizeof(double));
+    double joint_position_array[LBRState::NUMBER_OF_JOINTS];
+    memcpy(joint_position_array, robotState().getMeasuredJointPosition(), LBRState::NUMBER_OF_JOINTS * sizeof(double));
 
-	memcpy(jointPos, robotState().getMeasuredJointPosition(), LBRState::NUMBER_OF_JOINTS * sizeof(double));
-	measured_joint_values_ = std::vector<double>(jointPos, jointPos + 7);
 
-	if (VERBOSE)
-	{
-		for (const auto& joint_value : measured_joint_values_)
-		{
-			std::cout << joint_value;
-		}
-		std::cout << std::endl;
-	}
+    measured_joint_values_ = std::vector<double>(joint_position_array, joint_position_array + 7);
 
-	// Initialize target joint values if they are empty
-	if (target_joint_values_.size() == 0)
-		target_joint_values_ = measured_joint_values_;
+    if (VERBOSE)
+    {
+        for (const auto& joint_value : measured_joint_values_)
+        {
+            std::cout << joint_value;
+        }
+        std::cout << std::endl;
+    }
 
-	if (joint_value_update_callback_ != nullptr)
-		joint_value_update_callback_(measured_joint_values_);
-	if (target_joint_value_update_callback_ != nullptr)
-		target_joint_value_update_callback_(target_joint_values_);
+    // Initialize target joint values if they are empty
+    if (target_joint_values_.size() == 0)
+        target_joint_values_ = measured_joint_values_;
 
-	robotCommand().setJointPosition(&target_joint_values_[0]);
-
-    //TODO Update ROS state with the current joint positions
-    //measured_joint_values_
+    robotCommand().setJointPosition(&target_joint_values_[0]);
 }
-//******************************************************************************
-// clean up additional defines
-#ifdef _USE_MATH_DEFINES
-#undef _USE_MATH_DEFINES
-#endif
+
+

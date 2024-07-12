@@ -43,12 +43,12 @@ add_library(${PROJECT_NAME} SHARED
     src/kuka/protobuf/pb_frimessages_callbacks.c
 
     src/kuka/protobuf_gen/FRIMessages.pb.c
+
     )
 
 ament_target_dependencies(${PROJECT_NAME}
     sas_core
     Eigen3
-    Qt6Core
 
     )
 
@@ -66,6 +66,7 @@ target_include_directories(${PROJECT_NAME}
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/kuka/nanopb-0.2.8>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/kuka/protobuf>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/kuka/protobuf_gen>
+
     )
 
 # Defines related to the kuka libraries
@@ -87,18 +88,14 @@ ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(
     Eigen3
     sas_core
-    Qt6::Core
 
-    )
-
-target_link_libraries(${PROJECT_NAME}
-    Qt6::Core
 
     )
 
 install(
     DIRECTORY include/
     DESTINATION include
+
     )
 
 install(
@@ -108,10 +105,44 @@ install(
     ARCHIVE DESTINATION lib
     RUNTIME DESTINATION bin
     INCLUDES DESTINATION include
+
     )
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #
 # CPP Shared Library Block [END] #
 ##################################
+
+############################
+# CPP Binary Block [BEGIN] #
+# vvvvvvvvvvvvvvvvvvvvvvvv #
+# https://ros2-tutorial.readthedocs.io/en/latest/
+# While we cant use blocks https://cmake.org/cmake/help/latest/command/block.html#command:block
+# we use set--unset
+set(RCLCPP_LOCAL_BINARY_NAME test_sas_driver_kuka)
+
+add_executable(${RCLCPP_LOCAL_BINARY_NAME}
+    src/test_sas_driver_kuka.cpp
+
+    )
+
+target_link_libraries(${RCLCPP_LOCAL_BINARY_NAME}
+    ${PROJECT_NAME}
+    Qt6::Core
+
+    )
+
+target_include_directories(${RCLCPP_LOCAL_BINARY_NAME} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+
+target_compile_features(${RCLCPP_LOCAL_BINARY_NAME} PUBLIC c_std_99 cxx_std_17)
+
+install(TARGETS ${RCLCPP_LOCAL_BINARY_NAME}
+    DESTINATION lib/${PROJECT_NAME})
+
+unset(RCLCPP_LOCAL_BINARY_NAME)
+# ^^^^^^^^^^^^^^^^^^^^^^ #
+# CPP Binary Block [END] #
+##########################
 
 if(BUILD_TESTING)
     find_package(ament_lint_auto REQUIRED)

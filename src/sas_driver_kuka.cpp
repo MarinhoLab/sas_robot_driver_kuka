@@ -24,14 +24,63 @@
 # ################################################################*/
 
 #include "sas_robot_driver_kuka/sas_robot_driver_kuka.hpp"
+#include "joint_overlay_client.h"
+#include <memory>
+
 
 namespace sas
 {
+
+class RobotDriverKuka::Impl
+{
+public:
+    std::shared_ptr<LBRJointCommandOverlayClient> trafo_client_;
+};
 
 RobotDriverKuka::RobotDriverKuka(const RobotDriverKukaConfiguration& configuration, std::atomic_bool* break_loops):
 RobotDriver(break_loops)
 {
 
+}
+
+VectorXd RobotDriverKuka::get_joint_positions()
+{
+    return impl_->trafo_client_->get_measured_joint_values();
+}
+
+void RobotDriverKuka::set_target_joint_positions(const VectorXd &desired_joint_positions_rad)
+{
+    impl_->trafo_client_->set_target_joint_values(desired_joint_positions_rad);
+}
+
+void RobotDriverKuka::connect()
+{
+    std::atomic_bool* connection_state = nullptr; //Unknown connection state
+    fri_thread_ = std::thread(communication_thread_loop, impl_->trafo_client_, break_loops_, connection_state);
+
+    //We need the connection to be established before moving on.
+    //However, we guarantee that this doesn't lock us with break_loops.
+    while (!(*break_loops_) && connection_state == nullptr)
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+}
+
+void RobotDriverKuka::disconnect()
+{
+    //To force the thread to shutdown if it hasn't already done so
+    *break_loops_ = true;
+
+    if (fri_thread_.joinable())
+        fri_thread_.join();
+}
+
+void RobotDriverKuka::initialize()
+{
+    //Nothing to do
+}
+
+void RobotDriverKuka::deinitialize()
+{
+    //Nothing to do
 }
 
 }
