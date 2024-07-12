@@ -30,6 +30,12 @@
 #include "sas_robot_driver_kuka/sas_robot_driver_kuka.hpp"
 #include <dqrobotics/utils/DQ_Math.h>
 
+//#include<unistd.h>
+//#include<sys/resource.h>
+//#include<sys/syscall.h>
+//#include<sys/types.h>
+
+
 /*********************************************
  * SIGNAL HANDLER
  * *******************************************/
@@ -46,6 +52,8 @@ int main(int argc, char** argv)
     {
         throw std::runtime_error("::Error setting the signal int handler.");
     }
+
+    //std::cout << setpriority(PRIO_PROCESS,0,-20) << std::endl;
 
     rclcpp::init(argc,argv,rclcpp::InitOptions(),rclcpp::SignalHandlerOptions::None);
 

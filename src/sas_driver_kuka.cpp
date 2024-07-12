@@ -25,6 +25,7 @@
 
 #include "sas_robot_driver_kuka/sas_robot_driver_kuka.hpp"
 #include "joint_overlay_client.h"
+#include <iostream>
 #include <memory>
 
 
@@ -69,6 +70,13 @@ void RobotDriverKuka::connect()
 {
     std::atomic_bool connection_state(false); //Unknown connection state
     fri_thread_ = std::thread(communication_thread_loop, impl_->trafo_client_, break_loops_, &connection_state);
+    sched_param sch;
+    int policy;
+    pthread_getschedparam(fri_thread_.native_handle(), &policy, &sch);
+    sch.sched_priority = 20;
+    if (pthread_setschedparam(fri_thread_.native_handle(), SCHED_FIFO, &sch)) {
+        std::cout << "Failed to setschedparam: " << std::strerror(errno) << '\n';
+    }
 
     //We need the connection to be established before moving on.
     //However, we guarantee that this doesn't lock us with break_loops.

@@ -71,6 +71,7 @@ cost of any service and repair.
 #include "joint_overlay_client.h"
 #include "friUdpConnection.h"
 #include "friClientApplication.h"
+#include <thread>
 
 constexpr int DEFAULT_PORTID = 30200; //Original Kuka code had a define
 using namespace KUKA::FRI;
@@ -87,6 +88,12 @@ int communication_thread_loop(std::shared_ptr<LBRJointCommandOverlayClient> traf
                               std::atomic_bool* break_loops,
                               std::atomic_bool* connection_established)
 {
+    //pthread_attr_t attr;
+    //int ret;
+    //ret = pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
+    //if (ret) {
+    //    printf("pthread setschedpolicy failed\n");
+    //}
    //SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
 
    char* hostname = NULL;
