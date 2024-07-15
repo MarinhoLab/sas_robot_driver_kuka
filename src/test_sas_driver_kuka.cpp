@@ -23,18 +23,12 @@
 #
 # ################################################################*/
 #include <rclcpp/rclcpp.hpp>
-#include <sas_core/examples/sas_robot_driver_example.hpp>
-#include <sas_core/eigen3_std_conversions.hpp>
 #include <sas_robot_driver/sas_robot_driver_ros.hpp>
 #include <sas_common/sas_common.hpp>
 #include "sas_robot_driver_kuka/sas_robot_driver_kuka.hpp"
 #include <dqrobotics/utils/DQ_Math.h>
 
-//#include<unistd.h>
-//#include<sys/resource.h>
-//#include<sys/syscall.h>
-//#include<sys/types.h>
-
+#include "sas_robot_driver_kuka_constants.hpp"
 
 /*********************************************
  * SIGNAL HANDLER
@@ -53,8 +47,6 @@ int main(int argc, char** argv)
         throw std::runtime_error("::Error setting the signal int handler.");
     }
 
-    //std::cout << setpriority(PRIO_PROCESS,0,-20) << std::endl;
-
     rclcpp::init(argc,argv,rclcpp::InitOptions(),rclcpp::SignalHandlerOptions::None);
 
     auto node = std::make_shared<rclcpp::Node>("sas_robot_driver_kuka");
@@ -68,10 +60,10 @@ int main(int argc, char** argv)
 
         std::vector<double> joint_limits_min;
         std::vector<double> joint_limits_max;
-        node->get_parameter_or("joint_limits_min",joint_limits_min,{-170,-120,-170,-120,-170,-120,-175});
-        node->get_parameter_or("joint_limits_max",joint_limits_max,{170,120,170,120,170,120,175});
-        configuration.joint_limits = {deg2rad(sas::std_vector_double_to_vectorxd(joint_limits_min)),
-                                      deg2rad(sas::std_vector_double_to_vectorxd(joint_limits_max))};
+        node->get_parameter_or("joint_limits_min",joint_limits_min,sas::kuka_r820_constants::joint_limits_min_deg_std);
+        node->get_parameter_or("joint_limits_max",joint_limits_max,sas::kuka_r820_constants::joint_limits_max_deg_std);
+        configuration.joint_limits = {deg2rad(sas::kuka_r820_constants::joint_limits_min_deg_eigen),
+                                      deg2rad(sas::kuka_r820_constants::joint_limits_max_deg_eigen)};
 
         sas::RobotDriverROSConfiguration robot_driver_ros_configuration;
         node->get_parameter_or("thread_sampling_time_sec",robot_driver_ros_configuration.thread_sampling_time_sec,0.001);
