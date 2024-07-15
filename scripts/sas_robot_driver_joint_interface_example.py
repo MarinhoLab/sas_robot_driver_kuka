@@ -39,7 +39,7 @@ def main(args=None):
         node = rclcpp_Node("sas_robot_driver_kuka_joint_space_example_node_cpp")
 
         # Initialize the RobotDriverClient
-        rdi = RobotDriverClient(node, 'sas_robot_driver_kuka_coppeliasim_only')
+        rdi = RobotDriverClient(node, 'real_kuka_1')
 
         # Wait for RobotDriverClient to be enabled
         while not rdi.is_enabled():
@@ -54,7 +54,7 @@ def main(args=None):
         print(f"joint positions = {joint_positions}")
 
         # Move the joints from their current state
-        target_joint_positions = joint_positions + deg2rad([1, 1, 1, 1, 1, 1, 1])
+        target_joint_positions = joint_positions + deg2rad([-0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5])
         rdi.send_target_joint_positions(target_joint_positions)
 
         # Wait until the joints move close enough
