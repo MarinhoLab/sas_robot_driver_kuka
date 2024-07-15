@@ -56,17 +56,17 @@ int main(int argc, char** argv)
         RCLCPP_INFO_STREAM_ONCE(node->get_logger(), "::Loading parameters from parameter server.");
 
         sas::RobotDriverKukaConfiguration configuration;
-        node->get_parameter_or("robot_name",configuration.name,std::string("Kuka"));
+        sas::get_ros_parameter(node,"robot_name",configuration.name);
 
         std::vector<double> joint_limits_min;
         std::vector<double> joint_limits_max;
-        node->get_parameter_or("joint_limits_min",joint_limits_min,sas::kuka_r820_constants::joint_limits_min_deg_std);
-        node->get_parameter_or("joint_limits_max",joint_limits_max,sas::kuka_r820_constants::joint_limits_max_deg_std);
+        sas::get_ros_parameter(node,"joint_limits_min",joint_limits_min);
+        sas::get_ros_parameter(node,"joint_limits_max",joint_limits_max);
         configuration.joint_limits = {deg2rad(sas::kuka_r820_constants::joint_limits_min_deg_eigen),
                                       deg2rad(sas::kuka_r820_constants::joint_limits_max_deg_eigen)};
 
         sas::RobotDriverROSConfiguration robot_driver_ros_configuration;
-        node->get_parameter_or("thread_sampling_time_sec",robot_driver_ros_configuration.thread_sampling_time_sec,0.001);
+        sas::get_ros_parameter(node,"thread_sampling_time_sec",robot_driver_ros_configuration.thread_sampling_time_sec);
         robot_driver_ros_configuration.robot_driver_provider_prefix = node->get_name();
 
         RCLCPP_INFO_STREAM_ONCE(node->get_logger(), "::Parameters OK.");

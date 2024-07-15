@@ -117,10 +117,10 @@ install(
 # https://ros2-tutorial.readthedocs.io/en/latest/
 # While we cant use blocks https://cmake.org/cmake/help/latest/command/block.html#command:block
 # we use set--unset
-set(RCLCPP_LOCAL_BINARY_NAME test_sas_driver_kuka)
+set(RCLCPP_LOCAL_BINARY_NAME sas_robot_driver_kuka_node)
 
 add_executable(${RCLCPP_LOCAL_BINARY_NAME}
-    src/test_sas_driver_kuka.cpp
+    src/sas_robot_driver_kuka_node.cpp
 
     )
 
@@ -164,7 +164,7 @@ install(DIRECTORY
 # According to https://github.com/SmartArmStack/sas_datalogger/blob/78ac681f9cb049c5b9715d215f163565f16b5cdc/CMakeLists.txt
 ##### PYTHON EXECUTABLES #####
 install(PROGRAMS
-  scripts/sas_robot_driver_interface_example.py
+  scripts/sas_robot_driver_joint_interface_example.py
   DESTINATION lib/${PROJECT_NAME}
 )
 ##END## PYTHON EXECUTABLES #####

@@ -19,7 +19,7 @@
 # ################################################################
 #
 #   Author: Murilo M. Marinho, email: murilomarinho@ieee.org
-#   Based on `sas_robot_driver_interface_example.py` from `sas_robot_driver`
+#   Based on `sas_robot_driver_joint_interface_example.py` from `sas_robot_driver`
 #
 # ################################################################
 """
