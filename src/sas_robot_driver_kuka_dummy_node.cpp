@@ -23,9 +23,10 @@
 #
 # ################################################################*/
 #include <rclcpp/rclcpp.hpp>
+#include <sas_core/examples/sas_robot_driver_example.hpp>
+#include <sas_core/eigen3_std_conversions.hpp>
 #include <sas_robot_driver/sas_robot_driver_ros.hpp>
 #include <sas_common/sas_common.hpp>
-#include "sas_robot_driver_kuka/sas_robot_driver_kuka.hpp"
 #include <dqrobotics/utils/DQ_Math.h>
 
 #include "sas_robot_driver_kuka_constants.hpp"
@@ -55,7 +56,7 @@ int main(int argc, char** argv)
     {
         RCLCPP_INFO_STREAM_ONCE(node->get_logger(), "::Loading parameters from parameter server.");
 
-        sas::RobotDriverKukaConfiguration configuration;
+        sas::RobotDriverExampleConfiguration configuration;
         node->get_parameter_or("robot_name",configuration.name,std::string("Kuka"));
 
         std::vector<double> joint_limits_min;
@@ -73,7 +74,7 @@ int main(int argc, char** argv)
 
 
         RCLCPP_INFO_STREAM_ONCE(node->get_logger(), "::Instantiating RobotDriverKuka.");
-        auto robot_driver_kuka = std::make_shared<sas::RobotDriverKuka>(configuration,
+        auto robot_driver_kuka = std::make_shared<sas::RobotDriverExample>(configuration,
                                                                               &kill_this_process);
 
         RCLCPP_INFO_STREAM_ONCE(node->get_logger(), "::Instantiating RobotDriverROS.");
