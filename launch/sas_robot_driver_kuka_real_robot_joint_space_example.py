@@ -17,7 +17,7 @@ def generate_launch_description():
             name='sas_robot_driver_kuka_real_with_coppeliasim',
             parameters=[{
                 "robot_driver_client_names": ["real_kuka_1"],
-                "use_real_robot": False,
+                "use_real_robot": True,
                 "use_coppeliasim": True,
                 "vrep_robot_joint_names": joint_names,
                 "vrep_ip": "127.0.0.1",
