@@ -63,7 +63,6 @@ cost of any service and repair.
 #include <cstdlib>
 #include <cstdio>
 #include <cstring> // strstr
-#include <csignal>
 #include <atomic>
 #include <iostream>
 #include <memory>
@@ -71,7 +70,6 @@ cost of any service and repair.
 #include "joint_overlay_client.h"
 #include "friUdpConnection.h"
 #include "friClientApplication.h"
-#include <thread>
 
 constexpr int DEFAULT_PORTID = 30200; //Original Kuka code had a define
 using namespace KUKA::FRI;
@@ -88,20 +86,8 @@ int communication_thread_loop(std::shared_ptr<LBRJointCommandOverlayClient> traf
                               std::atomic_bool* break_loops,
                               std::atomic_bool* connection_established)
 {
-    //pthread_attr_t attr;
-    //int ret;
-    //ret = pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
-    //if (ret) {
-    //    printf("pthread setschedpolicy failed\n");
-    //}
-   //SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
-
    char* hostname = NULL;
    int port = DEFAULT_PORTID;
-
-   //LBRJointCommandOverlayClient trafo_client;
-   //trafoClient->set_joint_value_update_callback(update_joint_value_list);
-   //trafoClient->set_target_joint_value_update_callback(update_target_joint_value_list);
 
    //Configuration
    UdpConnection connection(1000);
@@ -129,8 +115,6 @@ int communication_thread_loop(std::shared_ptr<LBRJointCommandOverlayClient> traf
       }
    }
    break_loops->store(true);
-   //Kill everything else in case the loop is broken for another reason
-   //raise(SIGINT);
 
    // disconnect from controller
    app.disconnect();
