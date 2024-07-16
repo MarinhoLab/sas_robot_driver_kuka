@@ -70,6 +70,8 @@ void RobotDriverKuka::connect()
 {
     std::atomic_bool connection_state(false); //Unknown connection state
     fri_thread_ = std::thread(communication_thread_loop, impl_->trafo_client_, break_loops_, &connection_state);
+
+    //Set the communication thread to be realtime with SCHED_FIFO.
     sched_param sch;
     int policy;
     pthread_getschedparam(fri_thread_.native_handle(), &policy, &sch);

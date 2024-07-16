@@ -164,7 +164,7 @@ install(DIRECTORY
 # According to https://github.com/SmartArmStack/sas_datalogger/blob/78ac681f9cb049c5b9715d215f163565f16b5cdc/CMakeLists.txt
 ##### PYTHON EXECUTABLES #####
 install(PROGRAMS
-  scripts/sas_robot_driver_joint_interface_example.py
+  scripts/sas_robot_driver_kuka_joint_interface_example.py
   DESTINATION lib/${PROJECT_NAME}
 )
 ##END## PYTHON EXECUTABLES #####
