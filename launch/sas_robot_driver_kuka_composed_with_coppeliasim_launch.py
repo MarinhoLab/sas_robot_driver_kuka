@@ -1,3 +1,7 @@
+"""This launch file depends on the robot driver mentioned, `kuka_1`, be active. In addition, the correct scene must
+be loaded in CoppeliaSim and the simulation must be started. If there are connection issues, restarting the simulation
+(not the entire program, just stopping and starting the simulation) might do the trick."""
+
 from launch import LaunchDescription
 from launch_ros.actions import Node
 
@@ -14,9 +18,9 @@ def generate_launch_description():
             executable='sas_robot_driver_ros_composer_node',
             output='screen',
             emulate_tty=True,
-            name='sas_robot_driver_kuka_real_with_coppeliasim',
+            name='sas_robot_driver_kuka_composed_with_coppeliasim',
             parameters=[{
-                "robot_driver_client_names": ["real_kuka_1"],
+                "robot_driver_client_names": ["kuka_1"],
                 "use_real_robot": True,
                 "use_coppeliasim": True,
                 "vrep_robot_joint_names": joint_names,

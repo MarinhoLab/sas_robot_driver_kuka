@@ -19,7 +19,7 @@
 # ################################################################
 #
 #   Author: Murilo M. Marinho, email: murilomarinho@ieee.org
-#   Based on `sas_robot_driver_joint_interface_example.py` from `sas_robot_driver`
+#   Based on `sas_robot_driver_kuka_joint_interface_example.py` from `sas_robot_driver`
 #
 # ################################################################
 """
@@ -30,7 +30,7 @@ from dqrobotics import *  # Despite what PyCharm might say, this is very much ne
 from dqrobotics.utils.DQ_Math import deg2rad
 
 from sas_common import rclcpp_init, rclcpp_Node, rclcpp_spin_some, rclcpp_shutdown
-from sas_robot_driver import RobotDriverClient, RobotDriverServer
+from sas_robot_driver import RobotDriverClient
 
 
 def main(args=None):
@@ -39,7 +39,7 @@ def main(args=None):
         node = rclcpp_Node("sas_robot_driver_kuka_joint_space_example_node_cpp")
 
         # Initialize the RobotDriverClient
-        rdi = RobotDriverClient(node, 'real_kuka_1')
+        rdi = RobotDriverClient(node, 'kuka_1')
 
         # Wait for RobotDriverClient to be enabled
         while not rdi.is_enabled():
@@ -58,7 +58,7 @@ def main(args=None):
         rdi.send_target_joint_positions(target_joint_positions)
 
         # Wait until the joints move close enough
-        while not numpy.allclose(target_joint_positions,rdi.get_joint_positions(),rtol=10e-1):
+        while not numpy.allclose(target_joint_positions, rdi.get_joint_positions(), rtol=10e-1):
             rclcpp_spin_some(node)
             time.sleep(0.1)
 
