@@ -20,7 +20,7 @@
 # #######################################################################################
 #
 #   Author: Murilo M. Marinho, email: murilomarinho@ieee.org
-#   Based on `sas_robot_driver_kuka_joint_interface_example.py` from `sas_robot_driver`
+#   Based on `joint_interface_example.py` from `sas_robot_driver`
 #
 # #######################################################################################
 """
