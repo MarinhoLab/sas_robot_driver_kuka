@@ -2,6 +2,8 @@
 
 ## Running the joint space example in CoppeliaSim
 
+_Other versions of CoppeliaSim might be available. See `scenes/`._
+
 1. Download and unpack CoppeliaSim 4.1.0 Edu. https://coppeliarobotics.com/previousVersions
 
     i. *Common mistake: Downloading the wrong version*
@@ -16,12 +18,7 @@
 
     ii. _Common issue: After activating the node once, a second run might be unable to connect. Stop the simulation and restart it to solve the issue._ 
 
-4. Split the terminator into four screens. Run, in each one (the order doesn't seem to matter).
-
-   | `ros2 launch sas_robot_driver_kuka sas_robot_driver_kuka_composed_with_coppeliasim_launch.py` | `ros2 launch sas_robot_driver_kuka sas_robot_driver_kuka_dummy_robot_example_launch.py` |
-   |-----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
-   | `ros2 run sas_robot_driver_kuka sas_robot_driver_kuka_joint_interface_example.py`             |                                                                                         |
-
+4. Run `ros2 launch sas_robot_driver_kuka coppeliasim_example_launch.py`
 
 ## Working with the real robot
 
