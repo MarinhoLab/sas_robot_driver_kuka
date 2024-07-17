@@ -83,14 +83,14 @@ which outputs, among many others,
 
 ### Troubleshooting realtime problems
 
-I have tested the driver with a considerable load in the machine, including CoppeliaSim (part of the example), Firefox, PyCharm, etc open.
+I have tested the driver with a considerable load in the machine, including CoppeliaSim (part of the example), Firefox, PyCharm, etc. open.
 
-What I have found so far is that the connection is robust, with no interruptions. The problem I've found is related to Ubuntu 24.04
-and wired connections.
+What I have found so far is that the connection is robust, with no interruptions. 
 
-If the wired connection is in the `Connecting` status, it fails randomly, frequently, and fast. This is followed by a `Connection failure` Ubuntu error that popus up.
+#### Unreliable network profiles
 
-Re-applying the settings to the necessary manual IP address will change the state to `Connected.`
-In the `connected` state, I have not yet witnessed a connection drop. 
+If the wired connection is in the `Connecting` status, it fails randomly, frequently, and fast. This is followed by a `Connection failure` Ubuntu error that pops up.
+Although I cannot pinpoint the source of this issue, manually re-applying the settings **temporarily** fixed the issue.
 
-At this stage, I do not know why the connection settings are not being saved properly. However, this workaround seems to be effective. 
+To solve it permanently, in the system admin account, I deleted the wired network profile and redefined it with the correct configuration.
+
