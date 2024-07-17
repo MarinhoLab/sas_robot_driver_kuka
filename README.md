@@ -20,6 +20,8 @@ _Other versions of CoppeliaSim might be available. See `scenes/`._
 
 4. Run `ros2 launch sas_robot_driver_kuka coppeliasim_example_launch.py`
 
+https://github.com/user-attachments/assets/715831f2-0504-4fb9-adc0-122521cd83c0
+
 ## Working with the real robot
 
 For using the real robot, you **must** have the risk assessments in place. This guide is meant to be helpful but holds absolutely no liability whatsoever. More details are available in the software license.
