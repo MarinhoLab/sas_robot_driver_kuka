@@ -37,10 +37,10 @@ This code will move the robot. Be sure that the workspace is free and safe for o
 4. In `a`, run the CoppeliaSim scene `scenes/KUKAR820_410.ttt` and start the simulation.
 5. Get ready to do these two actions quickly. This is a safety measure. 
    1. Run the `MM_FRI_RobotApp` on the Kuka teaching pendant.
-   2. In `b`, run `ros2 launch sas_robot_driver_kuka sas_robot_driver_kuka_real_robot_example_launch.py`
+   2. In `b`, run `ros2 launch sas_robot_driver_kuka real_robot_example_launch.py`
    3. The robot should now be active. This means that the emergency button must be held at all times.
-6. In `c`, run `ros2 launch sas_robot_driver_kuka sas_robot_driver_kuka_composed_with_coppeliasim_launch.py`. This will connect the CoppeliaSim scene with the ros2 code.
-7. In `d`, run `ros2 run sas_robot_driver_kuka sas_robot_driver_kuka_joint_interface_example.py`. The robot will move in a sine wave in joint space, with respect to its initial joint values.
+6. In `c`, run `ros2 launch sas_robot_driver_kuka composed_with_coppeliasim_launch.py`. This will connect the CoppeliaSim scene with the ros2 code.
+7. In `d`, run `ros2 run sas_robot_driver_kuka joint_interface_example.py`. The robot will move in a sine wave in joint space, with respect to its initial joint values.
 
 The statistics will be printed in the end. For example
 
@@ -79,4 +79,16 @@ which outputs, among many others,
 
 `user   17545   17542   17559   15 FF   60 16:22 pts/1    00:00:21 /home/user/ros2_ws/install/sas_robot_driver_kuka/lib/sas_robot_driver_kuka/test_sas_driver_kuka`
 
+### Troubleshooting realtime problems
 
+I have tested the driver with a considerable load in the machine, including CoppeliaSim (part of the example), Firefox, PyCharm, etc open.
+
+What I have found so far is that the connection is robust, with no interruptions. The problem I've found is related to Ubuntu 24.04
+and wired connections.
+
+If the wired connection is in the `Connecting` status, it fails randomly, frequently, and fast. This is followed by a `Connection failure` Ubuntu error that popus up.
+
+Re-applying the settings to the necessary manual IP address will change the state to `Connected.`
+In the `connected` state, I have not yet witnessed a connection drop. 
+
+At this stage, I do not know why the connection settings are not being saved properly. However, this workaround seems to be effective. 
