@@ -30,6 +30,6 @@ def generate_launch_description():
             executable='joint_interface_example.py',
             output='screen',
             emulate_tty=True,
-            name='sas_robot_driver_joint_interface_example'
+            name='sas_robot_driver_kuka_joint_interface_example'
         )
     ])

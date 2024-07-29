@@ -45,7 +45,6 @@ def main(args=None):
 
         # 1 ms clock
         clock = Clock(0.01)
-        clock.init()
 
         # Initialize the RobotDriverClient
         rdi = RobotDriverClient(node, 'sas_robot_driver_kuka_composed_with_coppeliasim')
@@ -63,6 +62,7 @@ def main(args=None):
         print(f"joint positions = {joint_positions}")
 
         # For some iterations. Note that this can be stopped with CTRL+C.
+        clock.init()
         for i in range(0, 5000):
             clock.update_and_sleep()
 
