@@ -44,6 +44,10 @@ This code will move the robot. Be sure that the workspace is free and safe for o
 6. In `c`, run `ros2 launch sas_robot_driver_kuka composed_with_coppeliasim_launch.py`. This will connect the CoppeliaSim scene with the ros2 code.
 7. In `d`, run `ros2 run sas_robot_driver_kuka joint_interface_example.py`. The robot will move in a sine wave in joint space, with respect to its initial joint values.
 
+
+https://github.com/user-attachments/assets/687f5f72-71da-4185-8f7f-dd1a9ddcf855
+
+
 The statistics will be printed in the end. For example
 
 ```commandline
