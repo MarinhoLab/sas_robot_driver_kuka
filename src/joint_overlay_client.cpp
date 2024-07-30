@@ -101,21 +101,38 @@ VectorXd LBRJointCommandOverlayClient::get_measured_joint_values() const
 
 void LBRJointCommandOverlayClient::set_target_joint_values(const VectorXd& q)
 {
-    std::lock_guard<std::mutex> lock(mutex_target_joint_values_);
     if (q.size() != 7)
         throw std::runtime_error("Wrong vector size in set_target_joint_values");
+
+    std::lock_guard<std::mutex> lock(mutex_target_joint_values_);
     target_joint_values_ = sas::vectorxd_to_std_vector_double(q);
 }
 
+/**
+ * @brief LBRJointCommandOverlayClient::command
+ *
+ * Ideally the only way to guarantee "command" does not lock for too long is to use "try-lock" locally
+ * and "lock" in get_measured_joint_values() and set_target_joint_values(), even with the reduced scope.
+ */
 void LBRJointCommandOverlayClient::command()
 {
-    std::scoped_lock<std::mutex, std::mutex> lock(mutex_measured_joint_values_, mutex_target_joint_values_);
+    //std::scoped_lock<std::mutex, std::mutex> lock(mutex_measured_joint_values_, mutex_target_joint_values_);
 
     double joint_position_array[LBRState::NUMBER_OF_JOINTS];
     memcpy(joint_position_array, robotState().getMeasuredJointPosition(), LBRState::NUMBER_OF_JOINTS * sizeof(double));
 
+    { // Measured joint values mutex scope
+        std::lock_guard lock(mutex_measured_joint_values_);
+        measured_joint_values_ = std::vector<double>(joint_position_array, joint_position_array + 7);
+    }
 
-    measured_joint_values_ = std::vector<double>(joint_position_array, joint_position_array + 7);
+    { // Target joint values mutex scope
+        std::lock_guard lock(mutex_target_joint_values_);
+        // Initialize target joint values if they are empty
+        if (target_joint_values_.size() == 0)
+            target_joint_values_ = measured_joint_values_; // This only reads the state of "measured" and can't be run while the lock above is active.
+        robotCommand().setJointPosition(&target_joint_values_[0]);
+    }
 
     if (VERBOSE)
     {
@@ -125,12 +142,6 @@ void LBRJointCommandOverlayClient::command()
         }
         std::cout << std::endl;
     }
-
-    // Initialize target joint values if they are empty
-    if (target_joint_values_.size() == 0)
-        target_joint_values_ = measured_joint_values_;
-
-    robotCommand().setJointPosition(&target_joint_values_[0]);
 }
 
 
