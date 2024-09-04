@@ -66,6 +66,11 @@ void RobotDriverKuka::set_target_joint_positions(const VectorXd &desired_joint_p
     impl_->trafo_client_->set_target_joint_values(desired_joint_positions_rad);
 }
 
+VectorXd RobotDriverKuka::get_joint_torques()
+{
+    return impl_->trafo_client_->get_measured_joint_torques();
+}
+
 void RobotDriverKuka::connect()
 {
     std::atomic_bool connection_state(false); //Unknown connection state

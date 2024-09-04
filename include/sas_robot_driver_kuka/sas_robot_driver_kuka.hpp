@@ -62,6 +62,8 @@ public:
     VectorXd get_joint_positions() override;
     void set_target_joint_positions(const VectorXd& desired_joint_positions_rad) override;
 
+    VectorXd get_joint_torques() override;
+
     void connect() override;
     void disconnect() override;
 
