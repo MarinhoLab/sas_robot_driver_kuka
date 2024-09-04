@@ -100,6 +100,7 @@ public:
    virtual void command();
 
    VectorXd get_measured_joint_values() const;
+   VectorXd get_measured_joint_torques() const;
 
    using UpdateCallbackFunctionType = std::function<void(const std::vector<double>&) > ;
    void set_target_joint_values(const VectorXd &q);
@@ -112,6 +113,9 @@ private:
 
    std::vector<double> target_joint_values_;
    mutable std::mutex mutex_target_joint_values_;
+
+   std::vector<double> measured_joint_torques_;
+   mutable std::mutex mutex_measured_joint_torques_;
 };
 
 int communication_thread_loop(std::shared_ptr<LBRJointCommandOverlayClient> trafo_client, std::atomic_bool* break_loops, std::atomic_bool *connection_established);

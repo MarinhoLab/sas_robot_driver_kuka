@@ -99,6 +99,12 @@ VectorXd LBRJointCommandOverlayClient::get_measured_joint_values() const
     return sas::std_vector_double_to_vectorxd(measured_joint_values_);
 }
 
+VectorXd LBRJointCommandOverlayClient::get_measured_joint_torques() const
+{
+    std::lock_guard<std::mutex> lock(mutex_measured_joint_torques_);
+    return sas::std_vector_double_to_vectorxd(measured_joint_torques_);
+}
+
 void LBRJointCommandOverlayClient::set_target_joint_values(const VectorXd& q)
 {
     if (q.size() != 7)
@@ -123,8 +129,24 @@ void LBRJointCommandOverlayClient::command()
 
     { // Measured joint values mutex scope
         std::lock_guard lock(mutex_measured_joint_values_);
-        measured_joint_values_ = std::vector<double>(joint_position_array, joint_position_array + 7);
+        measured_joint_values_ = std::vector<double>(joint_position_array, joint_position_array + LBRState::NUMBER_OF_JOINTS);
     }
+
+    // Certain robot types, e.g. the LBR iiwa, have a joint torque sensor in each axis
+    // which measures the torque acting on the axis. The interface ITorqueSensiti-
+    // veRobot contains the methods required for polling sensor data from the robot.
+
+    // The measured torque values can be polled and evaluated in the application via the method getMeasuredTorque
+    double measured_torque_array[LBRState::NUMBER_OF_JOINTS];
+    memcpy(measured_torque_array, robotState().getMeasuredTorque(), LBRState::NUMBER_OF_JOINTS * sizeof(double));
+
+    // The external torque information is only valid if it's properly configured in the system, which is not the case now.
+    // KUKA_SunriseOS_111_SI_en.pdf, page 371
+    { // Measured joint torques mutex scope
+        std::lock_guard lock(mutex_measured_joint_torques_);
+        measured_joint_torques_ = std::vector<double>(measured_torque_array, measured_torque_array + LBRState::NUMBER_OF_JOINTS);
+    }
+
 
     { // Target joint values mutex scope
         std::lock_guard lock(mutex_target_joint_values_);
