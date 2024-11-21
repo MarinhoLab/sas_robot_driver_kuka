@@ -7,10 +7,15 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    joint_names = []
-    for i in range(1, 8):
-        joint_names.append(f"LBR_iiwa_14_R820_joint{i}")
-    print(joint_names)
+    joint_names = [
+        "/LBRiiwa14R820/joint",
+        "/LBRiiwa14R820/link2_resp/joint",
+        "/LBRiiwa14R820/link3_resp/joint",
+        "/LBRiiwa14R820/link4_resp/joint",
+        "/LBRiiwa14R820/link5_resp/joint",
+        "/LBRiiwa14R820/link6_resp/joint",
+        "/LBRiiwa14R820/link7_resp/joint"
+    ]
 
     return LaunchDescription([
         Node(
@@ -25,7 +30,7 @@ def generate_launch_description():
                 "use_coppeliasim": True,
                 "vrep_robot_joint_names": joint_names,
                 "vrep_ip": "127.0.0.1",
-                "vrep_port": 19997,
+                "vrep_port": 23000,
                 "vrep_dynamically_enabled": True,
                 "override_joint_limits_with_robot_parameter_file": False,
                 "thread_sampling_time_sec": 0.001
