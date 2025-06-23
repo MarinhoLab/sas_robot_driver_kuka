@@ -13,6 +13,23 @@ find_package(sas_core REQUIRED)
 find_package(sas_common REQUIRED)
 find_package(sas_robot_driver REQUIRED)
 
+# Compile Kuka library separately because it has warnings that bloom does not like
+add_library(KUKA_LIBS_LOCAL STATIC
+    src/kuka/base/friClientApplication.cpp
+    src/kuka/client_lbr/friLBRClient.cpp
+    src/kuka/client_lbr/friLBRCommand.cpp
+    src/kuka/client_lbr/friLBRState.cpp
+    src/kuka/client_trafo/friTransformationClient.cpp
+    src/kuka/connection/friUdpConnection.cpp
+    src/kuka/nanopb-0.2.8/pb_decode.c
+    src/kuka/nanopb-0.2.8/pb_encode.c
+    src/kuka/protobuf/friCommandMessageEncoder.cpp
+    src/kuka/protobuf/friMonitoringMessageDecoder.cpp
+    src/kuka/protobuf/pb_frimessages_callbacks.c
+    src/kuka/protobuf_gen/FRIMessages.pb.c
+)
+target_compiler_options(KUKA_LIBS_LOCAL PRIVATE "-w")
+
 ####################################
 # CPP Shared Library Block [BEGIN] #
 # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv #
@@ -24,29 +41,10 @@ add_library(${PROJECT_NAME} SHARED
 
     src/joint_overlay_app.cpp
     src/joint_overlay_client.cpp
-
-    src/kuka/base/friClientApplication.cpp
-
-    src/kuka/client_lbr/friLBRClient.cpp
-    src/kuka/client_lbr/friLBRCommand.cpp
-    src/kuka/client_lbr/friLBRState.cpp
-
-    src/kuka/client_trafo/friTransformationClient.cpp
-
-    src/kuka/connection/friUdpConnection.cpp
-
-    src/kuka/nanopb-0.2.8/pb_decode.c
-    src/kuka/nanopb-0.2.8/pb_encode.c
-
-    src/kuka/protobuf/friCommandMessageEncoder.cpp
-    src/kuka/protobuf/friMonitoringMessageDecoder.cpp
-    src/kuka/protobuf/pb_frimessages_callbacks.c
-
-    src/kuka/protobuf_gen/FRIMessages.pb.c
-
     )
 
 ament_target_dependencies(${PROJECT_NAME}
+    KUKA_LIBS_LOCAL
     sas_core
     Eigen3
 
@@ -70,9 +68,9 @@ target_include_directories(${PROJECT_NAME}
     )
 
 # Defines related to the kuka libraries
-target_compile_definitions(${PROJECT_NAME}
+target_compile_definitions(KUKA_LIBS
     PRIVATE
-
+    "-w"
     -DHAVE_SOCKLEN_T
     -DPB_FIELD_16BIT
     -DHAVE_STDINT_H
@@ -82,13 +80,11 @@ target_compile_definitions(${PROJECT_NAME}
     -DHAVE_STRING_H
 )
 
-
-
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(
+    KUKA_LIBS_LOCAL
     Eigen3
     sas_core
-
 
     )
 
