@@ -13,22 +13,7 @@ find_package(sas_core REQUIRED)
 find_package(sas_common REQUIRED)
 find_package(sas_robot_driver REQUIRED)
 
-# Compile Kuka library separately because it has warnings that bloom does not like
-add_library(KUKA_LIBS_LOCAL STATIC
-    src/kuka/base/friClientApplication.cpp
-    src/kuka/client_lbr/friLBRClient.cpp
-    src/kuka/client_lbr/friLBRCommand.cpp
-    src/kuka/client_lbr/friLBRState.cpp
-    src/kuka/client_trafo/friTransformationClient.cpp
-    src/kuka/connection/friUdpConnection.cpp
-    src/kuka/nanopb-0.2.8/pb_decode.c
-    src/kuka/nanopb-0.2.8/pb_encode.c
-    src/kuka/protobuf/friCommandMessageEncoder.cpp
-    src/kuka/protobuf/friMonitoringMessageDecoder.cpp
-    src/kuka/protobuf/pb_frimessages_callbacks.c
-    src/kuka/protobuf_gen/FRIMessages.pb.c
-)
-target_compiler_options(KUKA_LIBS_LOCAL PRIVATE "-w")
+add_subdirectory(src/kuka)
 
 ####################################
 # CPP Shared Library Block [BEGIN] #
@@ -44,7 +29,8 @@ add_library(${PROJECT_NAME} SHARED
     )
 
 ament_target_dependencies(${PROJECT_NAME}
-    KUKA_LIBS_LOCAL
+    PUBLIC
+    # KUKA_LIBS_LOCAL
     sas_core
     Eigen3
 
@@ -67,25 +53,10 @@ target_include_directories(${PROJECT_NAME}
 
     )
 
-# Defines related to the kuka libraries
-target_compile_definitions(KUKA_LIBS
+
+target_link_libraries(${PROJECT_NAME}
     PRIVATE
-    "-w"
-    -DHAVE_SOCKLEN_T
-    -DPB_FIELD_16BIT
-    -DHAVE_STDINT_H
-    -DHAVE_STDDEF_H
-    -DHAVE_STDBOOL_H
-    -DHAVE_STDLIB_H
-    -DHAVE_STRING_H
-)
-
-ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
-ament_export_dependencies(
-    KUKA_LIBS_LOCAL
-    Eigen3
-    sas_core
-
+    kuka_libs_local_static
     )
 
 install(
@@ -103,6 +74,14 @@ install(
     INCLUDES DESTINATION include
 
     )
+    
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_dependencies(
+    Eigen3
+    sas_core
+
+    )
+    
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #
 # CPP Shared Library Block [END] #
 ##################################
@@ -121,6 +100,7 @@ add_executable(${RCLCPP_LOCAL_BINARY_NAME}
     )
 
 ament_target_dependencies(${RCLCPP_LOCAL_BINARY_NAME}
+    PUBLIC
     rclcpp
     sas_common
     sas_core
@@ -128,9 +108,12 @@ ament_target_dependencies(${RCLCPP_LOCAL_BINARY_NAME}
 
 )
 
-target_link_libraries(${RCLCPP_LOCAL_BINARY_NAME}
-    ${PROJECT_NAME}
 
+target_link_libraries(${RCLCPP_LOCAL_BINARY_NAME}
+    PUBLIC
+    ${PROJECT_NAME}
+    PRIVATE
+    kuka_libs_local_static
     )
 
 target_include_directories(${RCLCPP_LOCAL_BINARY_NAME} PUBLIC
