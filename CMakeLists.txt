@@ -17,6 +17,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(sas_core REQUIRED)
 find_package(sas_common REQUIRED)
+find_package(sas_msgs REQUIRED)
 find_package(sas_conversions REQUIRED)
 find_package(sas_robot_driver REQUIRED)
 
