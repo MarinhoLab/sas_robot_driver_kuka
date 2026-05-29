@@ -121,4 +121,21 @@ unset(RCLCPP_LOCAL_BINARY_NAME)
 # CPP Binary Block [END] #
 ##########################
 
+##### Robot config files #####
+install(DIRECTORY
+  robots
+  DESTINATION share/${PROJECT_NAME}/
+)
+##END## Robot config files #####
+
+# According to https://github.com/SmartArmStack/sas_robot_driver/blob/ros2/CMakeLists.txt
+##### LAUNCH FILES #####
+
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}/
+)
+
+##END## LAUNCH FILES #####
+
 ament_package()    
