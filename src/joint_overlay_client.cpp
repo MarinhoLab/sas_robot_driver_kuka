@@ -63,6 +63,7 @@ cost of any service and repair.
 #include <iostream>
 #include <cstring>
 #include <cmath>
+#include <mutex>
 #include "joint_overlay_client.h"
 #include "friLBRState.h"
 #include <sas_core/eigen3_std_conversions.hpp>
@@ -150,25 +151,30 @@ void LBRJointCommandOverlayClient::command()
 
 
     { // Target joint values mutex scope
-        std::lock_guard lock(mutex_target_joint_values_);
-        // Initialize target joint values if they are empty
-        if (target_joint_values_.size() == 0)
+        std::unique_lock<std::mutex> lock(mutex_target_joint_values_, std::try_to_lock);
+        if (lock.owns_lock())
+        {
+            // Initialize target joint values if they are empty
+            if (target_joint_values_.size() == 0)
+            {
+                double ipo_joint_positions[LBRState::NUMBER_OF_JOINTS];
+                memcpy(ipo_joint_positions, robotState().getIpoJointPosition(), LBRState::NUMBER_OF_JOINTS * sizeof(double));
+                target_joint_values_ = std::vector<double>(ipo_joint_positions, ipo_joint_positions + LBRState::NUMBER_OF_JOINTS);
+                previous_target_joint_values_ = target_joint_values_;
+            }
+            constexpr double threshold_radians = 0.001 * M_PI / 180.0;
+            if (((sas::std_vector_double_to_vectorxd(target_joint_values_) - sas::std_vector_double_to_vectorxd(previous_target_joint_values_)).cwiseAbs().array() > threshold_radians).any())
+            {
+                previous_target_joint_values_ = target_joint_values_;
+            }
+        }
+        if (previous_target_joint_values_.size() == 0)
         {
             double ipo_joint_positions[LBRState::NUMBER_OF_JOINTS];
             memcpy(ipo_joint_positions, robotState().getIpoJointPosition(), LBRState::NUMBER_OF_JOINTS * sizeof(double));
-            target_joint_values_ = std::vector<double>(ipo_joint_positions, ipo_joint_positions + LBRState::NUMBER_OF_JOINTS);
-            previous_target_joint_values_ = target_joint_values_;
+            previous_target_joint_values_ = std::vector<double>(ipo_joint_positions, ipo_joint_positions + LBRState::NUMBER_OF_JOINTS);
         }
-        constexpr double threshold_radians = 0.001 * M_PI / 180.0;
-        if (((sas::std_vector_double_to_vectorxd(target_joint_values_) - sas::std_vector_double_to_vectorxd(previous_target_joint_values_)).cwiseAbs().array() > threshold_radians).any())
-        {
-            robotCommand().setJointPosition(&target_joint_values_[0]);
-            previous_target_joint_values_ = target_joint_values_;
-        }
-        else
-        {
-            robotCommand().setJointPosition(&previous_target_joint_values_[0]);
-        }
+        robotCommand().setJointPosition(&previous_target_joint_values_[0]);
     }
 
     if (VERBOSE)
