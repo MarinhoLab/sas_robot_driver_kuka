@@ -157,6 +157,7 @@ void LBRJointCommandOverlayClient::command()
             double ipo_joint_positions[LBRState::NUMBER_OF_JOINTS];
             memcpy(ipo_joint_positions, robotState().getIpoJointPosition(), LBRState::NUMBER_OF_JOINTS * sizeof(double));
             target_joint_values_ = std::vector<double>(ipo_joint_positions, ipo_joint_positions + LBRState::NUMBER_OF_JOINTS);
+            previous_target_joint_values_ = target_joint_values_;
         }
         constexpr double threshold_radians = 0.001 * M_PI / 180.0;
         if (((sas::std_vector_double_to_vectorxd(target_joint_values_) - sas::std_vector_double_to_vectorxd(previous_target_joint_values_)).cwiseAbs().array() > threshold_radians).any())
