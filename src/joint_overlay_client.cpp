@@ -8,10 +8,10 @@ agreement or other license is obtained by KUKA Deutschland GmbH, Augsburg, Germa
 
 SCOPE
 
-The software “KUKA Sunrise.Connectivity FRI Client SDK” is targeted to work in
-conjunction with the “KUKA Sunrise.Connectivity FastRobotInterface” toolkit.
-In the following, the term “software” refers to all material directly
-belonging to the provided SDK “Software development kit”, particularly source
+The software ï¿½KUKA Sunrise.Connectivity FRI Client SDKï¿½ is targeted to work in
+conjunction with the ï¿½KUKA Sunrise.Connectivity FastRobotInterfaceï¿½ toolkit.
+In the following, the term ï¿½softwareï¿½ refers to all material directly
+belonging to the provided SDK ï¿½Software development kitï¿½, particularly source
 code, libraries, binaries, manuals and technical documentation.
 
 COPYRIGHT
@@ -62,6 +62,7 @@ cost of any service and repair.
 */
 #include <iostream>
 #include <cstring>
+#include <cmath>
 #include "joint_overlay_client.h"
 #include "friLBRState.h"
 #include <sas_core/eigen3_std_conversions.hpp>
@@ -152,8 +153,21 @@ void LBRJointCommandOverlayClient::command()
         std::lock_guard lock(mutex_target_joint_values_);
         // Initialize target joint values if they are empty
         if (target_joint_values_.size() == 0)
-            target_joint_values_ = measured_joint_values_; // This only reads the state of "measured" and can't be run while the lock above is active.
-        robotCommand().setJointPosition(&target_joint_values_[0]);
+        {
+            double ipo_joint_positions[LBRState::NUMBER_OF_JOINTS];
+            memcpy(ipo_joint_positions, robotState().getIpoJointPosition(), LBRState::NUMBER_OF_JOINTS * sizeof(double));
+            target_joint_values_ = std::vector<double>(ipo_joint_positions, ipo_joint_positions + LBRState::NUMBER_OF_JOINTS);
+        }
+        constexpr double threshold_radians = 0.001 * M_PI / 180.0;
+        if (((sas::std_vector_double_to_vectorxd(target_joint_values_) - sas::std_vector_double_to_vectorxd(previous_target_joint_values_)).cwiseAbs().array() > threshold_radians).any())
+        {
+            robotCommand().setJointPosition(&target_joint_values_[0]);
+            previous_target_joint_values_ = target_joint_values_;
+        }
+        else
+        {
+            robotCommand().setJointPosition(&previous_target_joint_values_[0]);
+        }
     }
 
     if (VERBOSE)
