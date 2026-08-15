@@ -1,11 +1,11 @@
 services:
   sas_robot_driver_kuka:
-    build: .
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
     environment:
       TIMEOUT: 20
-    volumes:
-      - ../../sas_robot_driver_kuka:/root/sas_robot_driver_kuka_devel/src/sas_robot_driver_kuka
     command: /bin/bash -c "
       cd /root/sas_robot_driver_kuka_devel/src/sas_robot_driver_kuka/docker
-      && chmod +x test.sh 
+      && chmod +x test.sh
       && ./test.sh"
