@@ -100,6 +100,7 @@ public:
    virtual void command();
 
    VectorXd get_measured_joint_values() const;
+   VectorXd get_measured_joint_velocities() const;
    VectorXd get_measured_joint_torques() const;
 
    using UpdateCallbackFunctionType = std::function<void(const std::vector<double>&) > ;
@@ -117,6 +118,11 @@ private:
 
    std::vector<double> measured_joint_torques_;
    mutable std::mutex mutex_measured_joint_torques_;
+
+   std::vector<double> measured_joint_velocities_;
+   std::vector<double> previous_joint_values_for_velocity_;
+   mutable std::mutex mutex_measured_joint_velocities_;
+   void update_measured_joint_velocities(const std::vector<double>& q, const double sample_time_sec);
 };
 
 int communication_thread_loop(std::shared_ptr<LBRJointCommandOverlayClient> trafo_client, std::atomic_bool* break_loops, std::atomic_bool *connection_established);

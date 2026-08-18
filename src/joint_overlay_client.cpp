@@ -101,6 +101,12 @@ VectorXd LBRJointCommandOverlayClient::get_measured_joint_values() const
     return sas::std_vector_double_to_vectorxd(measured_joint_values_);
 }
 
+VectorXd LBRJointCommandOverlayClient::get_measured_joint_velocities() const
+{
+    std::lock_guard<std::mutex> lock(mutex_measured_joint_velocities_);
+    return sas::std_vector_double_to_vectorxd(measured_joint_velocities_);
+}
+
 VectorXd LBRJointCommandOverlayClient::get_measured_joint_torques() const
 {
     std::lock_guard<std::mutex> lock(mutex_measured_joint_torques_);
@@ -114,6 +120,50 @@ void LBRJointCommandOverlayClient::set_target_joint_values(const VectorXd& q)
 
     std::lock_guard<std::mutex> lock(mutex_target_joint_values_);
     target_joint_values_ = sas::vectorxd_to_std_vector_double(q);
+}
+
+void LBRJointCommandOverlayClient::update_measured_joint_velocities(const std::vector<double>& q, const double sample_time_sec)
+{
+    constexpr double kFilterCutoffHz = 10.0;
+    if (q.size() != LBRState::NUMBER_OF_JOINTS)
+        return;
+    const double dt = (sample_time_sec > 0.0) ? sample_time_sec : 0.001;
+
+    const size_t n = q.size();
+    VectorXd dq(n);
+    {
+        std::lock_guard<std::mutex> lock(mutex_measured_joint_velocities_);
+        if (previous_joint_values_for_velocity_.size() != n)
+        {
+            // No previous sample yet: seed the differentiator.
+            previous_joint_values_for_velocity_ = q;
+            measured_joint_velocities_ = std::vector<double>(n, 0.0);
+            return;
+        }
+        for (size_t i = 0; i < n; ++i)
+        {
+            double diff = q[i] - previous_joint_values_for_velocity_[i];
+            if (!std::isfinite(diff))
+            {
+                dq[i] = 0.0;
+                continue;
+            }
+            // Remove 2*pi jumps so a joint crossing the +/-180deg boundary does not
+            // produce a bogus velocity spike.
+            while (diff >  M_PI) diff -= 2.0 * M_PI;
+            while (diff < -M_PI) diff += 2.0 * M_PI;
+            dq[i] = diff / dt;
+        }
+        previous_joint_values_for_velocity_ = q;
+
+        // First-order low-pass to tame the noise inherent in a finite difference.
+        const double alpha = 2.0 * M_PI * kFilterCutoffHz * dt /
+                            (1.0 + 2.0 * M_PI * kFilterCutoffHz * dt);
+        if (measured_joint_velocities_.size() != n)
+            measured_joint_velocities_ = std::vector<double>(n, 0.0);
+        for (size_t i = 0; i < n; ++i)
+            measured_joint_velocities_[i] = measured_joint_velocities_[i] + alpha * (dq[i] - measured_joint_velocities_[i]);
+    }
 }
 
 /**
@@ -133,6 +183,11 @@ void LBRJointCommandOverlayClient::command()
         std::lock_guard lock(mutex_measured_joint_values_);
         measured_joint_values_ = std::vector<double>(joint_position_array, joint_position_array + LBRState::NUMBER_OF_JOINTS);
     }
+
+    // FRI does not transmit joint velocities, so estimate them by differentiating the
+    // measured joint positions at the FRI send period.
+    update_measured_joint_velocities(std::vector<double>(joint_position_array, joint_position_array + LBRState::NUMBER_OF_JOINTS),
+                                     robotState().getSampleTime());
 
     // Certain robot types, e.g. the LBR iiwa, have a joint torque sensor in each axis
     // which measures the torque acting on the axis. The interface ITorqueSensiti-
