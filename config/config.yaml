@@ -1,0 +1,6 @@
+kuka_1:
+  ros__parameters:
+    robot_name: 'r820'
+    joint_limits_min: [-170.0, -120.0, -170.0, -120.0, -170.0, -120.0, -175.0]
+    joint_limits_max: [170.0, 120.0, 170.0, 120.0, 170.0, 120.0, 175.0]
+    thread_sampling_time_sec: 0.001  # Robot thread is at 1000 Hz
