@@ -38,7 +38,6 @@ class DriverBcap;
 
 struct RobotDriverKukaConfiguration
 {
-    std::string name;
     std::tuple<VectorXd,VectorXd> joint_limits;
 };
 

@@ -56,7 +56,6 @@ int main(int argc, char** argv)
         RCLCPP_INFO_STREAM_ONCE(node->get_logger(), "::Loading parameters from parameter server.");
 
         sas::RobotDriverKukaConfiguration configuration;
-        sas::get_ros_parameter(node,"robot_name",configuration.name);
 
         std::vector<double> joint_limits_min;
         std::vector<double> joint_limits_max;
