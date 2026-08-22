@@ -28,7 +28,6 @@ ros2 launch sas_robot_driver_kuka robot_launch.py name:=kuka_1 config_file:=/pat
 
 | Parameter | Type | Mandatory / Optional | Default | Purpose |
 |---|---|---|---|---|
-| `robot_name` | string | **Mandatory** | none — must be provided | Name of the robot (e.g. `r820`) |
 | `joint_limits_min` | array of 7 doubles (degrees) | **Mandatory** | none — must be provided | Minimum joint limits, in degrees (e.g. `[-170.0, -120.0, -170.0, -120.0, -170.0, -120.0, -175.0]` for the R820) |
 | `joint_limits_max` | array of 7 doubles (degrees) | **Mandatory** | none — must be provided | Maximum joint limits, in degrees (e.g. `[170.0, 120.0, 170.0, 120.0, 170.0, 120.0, 175.0]` for the R820) |
 | `thread_sampling_time_sec` | double | **Mandatory** | none — must be provided | Sampling period of the robot control-loop thread (e.g. `0.001` s = 1000 Hz) |
