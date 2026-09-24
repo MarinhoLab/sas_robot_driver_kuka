@@ -71,7 +71,6 @@ cost of any service and repair.
 #include <mutex>
 #include <Eigen/Core>
 
-using namespace Eigen;
 
 
 /**
@@ -99,11 +98,11 @@ public:
     */
    virtual void command();
 
-   VectorXd get_measured_joint_values() const;
-   VectorXd get_measured_joint_torques() const;
+   Eigen::VectorXd get_measured_joint_values() const;
+   Eigen::VectorXd get_measured_joint_torques() const;
 
    using UpdateCallbackFunctionType = std::function<void(const std::vector<double>&) > ;
-   void set_target_joint_values(const VectorXd &q);
+   void set_target_joint_values(const Eigen::VectorXd &q);
       
 private:
    

@@ -56,17 +56,17 @@ RobotDriverKuka::~RobotDriverKuka()
 
 }
 
-VectorXd RobotDriverKuka::get_joint_positions()
+Eigen::VectorXd RobotDriverKuka::get_joint_positions()
 {
     return impl_->trafo_client_->get_measured_joint_values();
 }
 
-void RobotDriverKuka::set_target_joint_positions(const VectorXd &desired_joint_positions_rad)
+void RobotDriverKuka::set_target_joint_positions(const Eigen::VectorXd &desired_joint_positions_rad)
 {
     impl_->trafo_client_->set_target_joint_values(desired_joint_positions_rad);
 }
 
-VectorXd RobotDriverKuka::get_joint_torques()
+Eigen::VectorXd RobotDriverKuka::get_joint_torques()
 {
     return impl_->trafo_client_->get_measured_joint_torques();
 }

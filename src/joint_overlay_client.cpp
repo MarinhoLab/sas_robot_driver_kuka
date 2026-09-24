@@ -95,19 +95,19 @@ void LBRJointCommandOverlayClient::onStateChange(ESessionState oldState, ESessio
     }
 }
 
-VectorXd LBRJointCommandOverlayClient::get_measured_joint_values() const
+Eigen::VectorXd LBRJointCommandOverlayClient::get_measured_joint_values() const
 {
     std::lock_guard<std::mutex> lock(mutex_measured_joint_values_);
     return sas::std_vector_double_to_vectorxd(measured_joint_values_);
 }
 
-VectorXd LBRJointCommandOverlayClient::get_measured_joint_torques() const
+Eigen::VectorXd LBRJointCommandOverlayClient::get_measured_joint_torques() const
 {
     std::lock_guard<std::mutex> lock(mutex_measured_joint_torques_);
     return sas::std_vector_double_to_vectorxd(measured_joint_torques_);
 }
 
-void LBRJointCommandOverlayClient::set_target_joint_values(const VectorXd& q)
+void LBRJointCommandOverlayClient::set_target_joint_values(const Eigen::VectorXd& q)
 {
     if (q.size() != 7)
         throw std::runtime_error("Wrong vector size in set_target_joint_values");
