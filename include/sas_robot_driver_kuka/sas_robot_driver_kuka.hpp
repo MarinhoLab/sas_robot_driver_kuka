@@ -29,7 +29,6 @@
 
 #include <sas_core/sas_robot_driver.hpp>
 
-using namespace Eigen;
 
 namespace sas
 {
@@ -38,7 +37,7 @@ class DriverBcap;
 
 struct RobotDriverKukaConfiguration
 {
-    std::tuple<VectorXd,VectorXd> joint_limits;
+    std::tuple<Eigen::VectorXd,Eigen::VectorXd> joint_limits;
 };
 
 class RobotDriverKuka: public RobotDriver
@@ -58,10 +57,10 @@ public:
 
     RobotDriverKuka(const RobotDriverKukaConfiguration& configuration, std::atomic_bool* break_loops);
 
-    VectorXd get_joint_positions() override;
-    void set_target_joint_positions(const VectorXd& desired_joint_positions_rad) override;
+    Eigen::VectorXd get_joint_positions() override;
+    void set_target_joint_positions(const Eigen::VectorXd& desired_joint_positions_rad) override;
 
-    VectorXd get_joint_torques() override;
+    Eigen::VectorXd get_joint_torques() override;
 
     void connect() override;
     void disconnect() override;
