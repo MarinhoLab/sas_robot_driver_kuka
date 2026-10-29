@@ -45,7 +45,7 @@ public:
 };
 
 RobotDriverKuka::RobotDriverKuka(const RobotDriverKukaConfiguration& configuration, std::atomic_bool* break_loops):
-RobotDriver(break_loops)
+RobotDriver(std::make_shared<marinholab::sas::core::ShutdownSignaler>(break_loops))
 {
     impl_ = std::make_unique<RobotDriverKuka::Impl>();
     joint_limits_ = configuration.joint_limits;
