@@ -68,13 +68,13 @@ namespace KUKA
 namespace FRI
 {
 
-   // forward declarations
-   class IClient;
-   class TransformationClient;
-   class IConnection;
-   struct ClientData;
+// forward declarations
+class IClient;
+class TransformationClient;
+class IConnection;
+struct ClientData;
 
-   /**
+/**
     * \brief FRI client application class.
     * 
     * A client application takes an instance of the IConnection interface and
@@ -84,12 +84,10 @@ namespace FRI
     * The algorithmic functionality of an FRI client application is implemented
     * using the IClient interface.
     */
-   class ClientApplication
-   {
-   
-   public:
-   
-      /**
+class ClientApplication
+{
+public:
+    /**
        * \brief Constructor without transformation client.
        * 
        * This constructor takes an instance of the IConnection interface and
@@ -97,9 +95,9 @@ namespace FRI
        * @param connection FRI connection class
        * @param client FRI client class
        */
-      ClientApplication(IConnection& connection, IClient& client);
-     
-      /**
+    ClientApplication(IConnection& connection, IClient& client);
+
+    /**
        * \brief Constructor with transformation client.
        * 
        * This constructor takes an instance of the IConnection interface and
@@ -109,26 +107,26 @@ namespace FRI
        * @param client FRI client class
        * @param trafoClient FRI transformation client class
        */
-      ClientApplication(IConnection& connection, IClient& client, TransformationClient& trafoClient);
+    ClientApplication(IConnection& connection, IClient& client, TransformationClient& trafoClient);
 
-      /** \brief Destructor. */
-      ~ClientApplication();
-   
-      /**
+    /** \brief Destructor. */
+    ~ClientApplication();
+
+    /**
        * \brief Connect the FRI client application with a KUKA Sunrise controller.
        * 
        * @param port The port ID
        * @param remoteHost The address of the remote host
        * @return True if connection was established
        */
-      bool connect(int port, const char *remoteHost = NULL);
-      
-      /**
+    bool connect(int port, const char* remoteHost = NULL);
+
+    /**
        * \brief Disconnect the FRI client application from a KUKA Sunrise controller.
        */
-      void disconnect();
-   
-      /**
+    void disconnect();
+
+    /**
        * \brief Run a single processing step.
        * 
        * The processing step consists of receiving a new FRI monitoring message,
@@ -136,20 +134,16 @@ namespace FRI
        * FRI command message back to the KUKA Sunrise controller.
        * @return True if all of the substeps succeeded.
        */
-      bool step();
+    bool step();
 
-   protected:
-   
-      IConnection&   _connection;          //!< connection interface
-      IClient*       _robotClient;         //!< robot client interface
-      TransformationClient* _trafoClient;  //!< transformation client interface
-      ClientData*    _data;                //!< client data structure (for internal use)
+protected:
+    IConnection& _connection;            //!< connection interface
+    IClient* _robotClient;               //!< robot client interface
+    TransformationClient* _trafoClient;  //!< transformation client interface
+    ClientData* _data;                   //!< client data structure (for internal use)
+};
 
-   };
+}  // namespace FRI
+}  // namespace KUKA
 
-}
-}
-
-
-#endif // _KUKA_FRI_CLIENT_APPLICATION_H
-
+#endif  // _KUKA_FRI_CLIENT_APPLICATION_H

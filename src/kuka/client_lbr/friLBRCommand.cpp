@@ -67,47 +67,45 @@ using namespace KUKA::FRI;
 //******************************************************************************
 void LBRCommand::setJointPosition(const double* values)
 {
-   _cmdMessage->has_commandData = true;
-   _cmdMessage->commandData.has_jointPosition = true;
-   tRepeatedDoubleArguments *dest =
-            (tRepeatedDoubleArguments*)_cmdMessage->commandData.jointPosition.value.arg;
-   memcpy(dest->value, values, LBRState::NUMBER_OF_JOINTS * sizeof(double));
+    _cmdMessage->has_commandData = true;
+    _cmdMessage->commandData.has_jointPosition = true;
+    tRepeatedDoubleArguments* dest = (tRepeatedDoubleArguments*)_cmdMessage->commandData.jointPosition.value.arg;
+    memcpy(dest->value, values, LBRState::NUMBER_OF_JOINTS * sizeof(double));
 }
 
 //******************************************************************************
 void LBRCommand::setWrench(const double* wrench)
 {
-   _cmdMessage->has_commandData = true;
-   _cmdMessage->commandData.has_cartesianWrenchFeedForward = true;
+    _cmdMessage->has_commandData = true;
+    _cmdMessage->commandData.has_cartesianWrenchFeedForward = true;
 
-   double *dest = _cmdMessage->commandData.cartesianWrenchFeedForward.element;
-   memcpy(dest, wrench, 6 * sizeof(double));
+    double* dest = _cmdMessage->commandData.cartesianWrenchFeedForward.element;
+    memcpy(dest, wrench, 6 * sizeof(double));
 }
 //******************************************************************************
 void LBRCommand::setTorque(const double* torques)
 {
-   _cmdMessage->has_commandData = true;
-   _cmdMessage->commandData.has_jointTorque= true;
+    _cmdMessage->has_commandData = true;
+    _cmdMessage->commandData.has_jointTorque = true;
 
-   tRepeatedDoubleArguments *dest =
-              (tRepeatedDoubleArguments*)_cmdMessage->commandData.jointTorque.value.arg;
-   memcpy(dest->value, torques, LBRState::NUMBER_OF_JOINTS * sizeof(double));
+    tRepeatedDoubleArguments* dest = (tRepeatedDoubleArguments*)_cmdMessage->commandData.jointTorque.value.arg;
+    memcpy(dest->value, torques, LBRState::NUMBER_OF_JOINTS * sizeof(double));
 }
 
 //******************************************************************************
 void LBRCommand::setBooleanIOValue(const char* name, const bool value)
 {
-   ClientData::setBooleanIOValue(_cmdMessage, name, value, _monMessage);
+    ClientData::setBooleanIOValue(_cmdMessage, name, value, _monMessage);
 }
 
 //******************************************************************************
 void LBRCommand::setAnalogIOValue(const char* name, const double value)
 {
-   ClientData::setAnalogIOValue(_cmdMessage, name, value, _monMessage);
+    ClientData::setAnalogIOValue(_cmdMessage, name, value, _monMessage);
 }
 
 //******************************************************************************
 void LBRCommand::setDigitalIOValue(const char* name, const unsigned long long value)
 {
-   ClientData::setDigitalIOValue(_cmdMessage, name, value, _monMessage);
+    ClientData::setDigitalIOValue(_cmdMessage, name, value, _monMessage);
 }

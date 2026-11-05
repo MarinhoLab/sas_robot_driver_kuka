@@ -71,10 +71,7 @@ cost of any service and repair.
 using namespace KUKA::FRI;
 constexpr bool VERBOSE = false;
 
-LBRJointCommandOverlayClient::~LBRJointCommandOverlayClient()
-{
-}
-
+LBRJointCommandOverlayClient::~LBRJointCommandOverlayClient() {}
 
 void LBRJointCommandOverlayClient::onStateChange(ESessionState oldState, ESessionState newState)
 {
@@ -82,16 +79,16 @@ void LBRJointCommandOverlayClient::onStateChange(ESessionState oldState, ESessio
     // (re)initialize sine parameters when entering Monitoring
     switch (newState)
     {
-    case MONITORING_READY:
-    {
-        //This is available in the original example but its need here is unclear.
-        _offset = 0.0;
-        break;
-    }
-    default:
-    {
-        break;
-    }
+        case MONITORING_READY:
+        {
+            //This is available in the original example but its need here is unclear.
+            _offset = 0.0;
+            break;
+        }
+        default:
+        {
+            break;
+        }
     }
 }
 
@@ -129,9 +126,10 @@ void LBRJointCommandOverlayClient::command()
     double joint_position_array[LBRState::NUMBER_OF_JOINTS];
     memcpy(joint_position_array, robotState().getMeasuredJointPosition(), LBRState::NUMBER_OF_JOINTS * sizeof(double));
 
-    { // Measured joint values mutex scope
+    {  // Measured joint values mutex scope
         std::lock_guard lock(mutex_measured_joint_values_);
-        measured_joint_values_ = std::vector<double>(joint_position_array, joint_position_array + LBRState::NUMBER_OF_JOINTS);
+        measured_joint_values_ =
+            std::vector<double>(joint_position_array, joint_position_array + LBRState::NUMBER_OF_JOINTS);
     }
 
     // Certain robot types, e.g. the LBR iiwa, have a joint torque sensor in each axis
@@ -144,13 +142,13 @@ void LBRJointCommandOverlayClient::command()
 
     // The external torque information is only valid if it's properly configured in the system, which is not the case now.
     // KUKA_SunriseOS_111_SI_en.pdf, page 371
-    { // Measured joint torques mutex scope
+    {  // Measured joint torques mutex scope
         std::lock_guard lock(mutex_measured_joint_torques_);
-        measured_joint_torques_ = std::vector<double>(measured_torque_array, measured_torque_array + LBRState::NUMBER_OF_JOINTS);
+        measured_joint_torques_ =
+            std::vector<double>(measured_torque_array, measured_torque_array + LBRState::NUMBER_OF_JOINTS);
     }
 
-
-    { // Target joint values mutex scope
+    {  // Target joint values mutex scope
         std::unique_lock<std::mutex> lock(mutex_target_joint_values_, std::try_to_lock);
         if (lock.owns_lock())
         {
@@ -158,12 +156,18 @@ void LBRJointCommandOverlayClient::command()
             if (target_joint_values_.size() == 0)
             {
                 double ipo_joint_positions[LBRState::NUMBER_OF_JOINTS];
-                memcpy(ipo_joint_positions, robotState().getIpoJointPosition(), LBRState::NUMBER_OF_JOINTS * sizeof(double));
-                target_joint_values_ = std::vector<double>(ipo_joint_positions, ipo_joint_positions + LBRState::NUMBER_OF_JOINTS);
+                memcpy(ipo_joint_positions, robotState().getIpoJointPosition(),
+                       LBRState::NUMBER_OF_JOINTS * sizeof(double));
+                target_joint_values_ =
+                    std::vector<double>(ipo_joint_positions, ipo_joint_positions + LBRState::NUMBER_OF_JOINTS);
                 previous_target_joint_values_ = target_joint_values_;
             }
             constexpr double threshold_radians = 0.001 * M_PI / 180.0;
-            if (((sas::std_vector_double_to_vectorxd(target_joint_values_) - sas::std_vector_double_to_vectorxd(previous_target_joint_values_)).cwiseAbs().array() > threshold_radians).any())
+            if (((sas::std_vector_double_to_vectorxd(target_joint_values_) -
+                  sas::std_vector_double_to_vectorxd(previous_target_joint_values_))
+                     .cwiseAbs()
+                     .array() > threshold_radians)
+                    .any())
             {
                 previous_target_joint_values_ = target_joint_values_;
             }
@@ -171,8 +175,10 @@ void LBRJointCommandOverlayClient::command()
         if (previous_target_joint_values_.size() == 0)
         {
             double ipo_joint_positions[LBRState::NUMBER_OF_JOINTS];
-            memcpy(ipo_joint_positions, robotState().getIpoJointPosition(), LBRState::NUMBER_OF_JOINTS * sizeof(double));
-            previous_target_joint_values_ = std::vector<double>(ipo_joint_positions, ipo_joint_positions + LBRState::NUMBER_OF_JOINTS);
+            memcpy(ipo_joint_positions, robotState().getIpoJointPosition(),
+                   LBRState::NUMBER_OF_JOINTS * sizeof(double));
+            previous_target_joint_values_ =
+                std::vector<double>(ipo_joint_positions, ipo_joint_positions + LBRState::NUMBER_OF_JOINTS);
         }
         robotCommand().setJointPosition(&previous_target_joint_values_[0]);
     }
@@ -186,5 +192,3 @@ void LBRJointCommandOverlayClient::command()
         std::cout << std::endl;
     }
 }
-
-

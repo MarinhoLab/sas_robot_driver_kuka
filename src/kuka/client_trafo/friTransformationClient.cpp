@@ -70,118 +70,113 @@ cost of any service and repair.
 using namespace KUKA::FRI;
 
 //******************************************************************************
-TransformationClient::TransformationClient()
-{
-}
-      
+TransformationClient::TransformationClient() {}
+
 //******************************************************************************
-TransformationClient::~TransformationClient()
-{
-}
+TransformationClient::~TransformationClient() {}
 
 //******************************************************************************
 const std::vector<const char*>& TransformationClient::getRequestedTransformationIDs() const
 {
-   unsigned int trafoCount = _data->monitoringMsg.requestedTransformations_count;
-   _data->requestedTrafoIDs.resize(trafoCount);
-   for (unsigned int i=0; i<trafoCount; i++)
-   {
-      _data->requestedTrafoIDs[i] = _data->monitoringMsg.requestedTransformations[i].name;
-   }   
-	return _data->requestedTrafoIDs;
+    unsigned int trafoCount = _data->monitoringMsg.requestedTransformations_count;
+    _data->requestedTrafoIDs.resize(trafoCount);
+    for (unsigned int i = 0; i < trafoCount; i++)
+    {
+        _data->requestedTrafoIDs[i] = _data->monitoringMsg.requestedTransformations[i].name;
+    }
+    return _data->requestedTrafoIDs;
 }
 
 //******************************************************************************
-const unsigned int TransformationClient::getTimestampSec() const 
+const unsigned int TransformationClient::getTimestampSec() const
 {
-	return _data->monitoringMsg.monitorData.timestamp.sec;
+    return _data->monitoringMsg.monitorData.timestamp.sec;
 }
 
 //******************************************************************************
 const unsigned int TransformationClient::getTimestampNanoSec() const
 {
-	return _data->monitoringMsg.monitorData.timestamp.nanosec;
+    return _data->monitoringMsg.monitorData.timestamp.nanosec;
 }
 
 //******************************************************************************
-void TransformationClient::setTransformation(const char* transformationID, 
-      const double transformationMatrix[3][4], unsigned int timeSec, unsigned int timeNanoSec)
+void TransformationClient::setTransformation(const char* transformationID, const double transformationMatrix[3][4],
+                                             unsigned int timeSec, unsigned int timeNanoSec)
 {
-	_data->commandMsg.has_commandData = true;
-	
-	unsigned int currentSize = _data->commandMsg.commandData.commandedTransformations_count;
-	
-   if (currentSize < _data->MAX_REQUESTED_TRANSFORMATIONS)
-	{
-	   _data->commandMsg.commandData.commandedTransformations_count++;
-	   Transformation& dest = _data->commandMsg.commandData.commandedTransformations[currentSize];
-      strncpy(dest.name, transformationID, _data->MAX_SIZE_TRANSFORMATION_ID);
-      dest.name[_data->MAX_SIZE_TRANSFORMATION_ID - 1] = '\0';
-      dest.matrix_count = 12;
-	   memcpy(dest.matrix, transformationMatrix, 12 * sizeof(double));
-	   dest.has_timestamp = true;
-	   dest.timestamp.sec = timeSec;
-	   dest.timestamp.nanosec = timeNanoSec;
-	}
-   else
-   {
-      throw FRIException("Exceeded maximum number of transformations.");
-   }
+    _data->commandMsg.has_commandData = true;
+
+    unsigned int currentSize = _data->commandMsg.commandData.commandedTransformations_count;
+
+    if (currentSize < _data->MAX_REQUESTED_TRANSFORMATIONS)
+    {
+        _data->commandMsg.commandData.commandedTransformations_count++;
+        Transformation& dest = _data->commandMsg.commandData.commandedTransformations[currentSize];
+        strncpy(dest.name, transformationID, _data->MAX_SIZE_TRANSFORMATION_ID);
+        dest.name[_data->MAX_SIZE_TRANSFORMATION_ID - 1] = '\0';
+        dest.matrix_count = 12;
+        memcpy(dest.matrix, transformationMatrix, 12 * sizeof(double));
+        dest.has_timestamp = true;
+        dest.timestamp.sec = timeSec;
+        dest.timestamp.nanosec = timeNanoSec;
+    }
+    else
+    {
+        throw FRIException("Exceeded maximum number of transformations.");
+    }
 }
 
 //******************************************************************************
 void TransformationClient::linkData(ClientData* clientData)
 {
-	_data = clientData;
+    _data = clientData;
 }
 
 //******************************************************************************
 double TransformationClient::getSampleTime() const
 {
-   return _data->monitoringMsg.connectionInfo.sendPeriod * 0.001;
+    return _data->monitoringMsg.connectionInfo.sendPeriod * 0.001;
 }
 
 //******************************************************************************
 EConnectionQuality TransformationClient::getConnectionQuality() const
 {
-   return (EConnectionQuality)_data->monitoringMsg.connectionInfo.quality;
+    return (EConnectionQuality)_data->monitoringMsg.connectionInfo.quality;
 }
-
 
 //******************************************************************************
 void TransformationClient::setBooleanIOValue(const char* name, const bool value)
 {
-   ClientData::setBooleanIOValue(&_data->commandMsg, name, value, &_data->monitoringMsg);
+    ClientData::setBooleanIOValue(&_data->commandMsg, name, value, &_data->monitoringMsg);
 }
 
 //******************************************************************************
 void TransformationClient::setAnalogIOValue(const char* name, const double value)
 {
-   ClientData::setAnalogIOValue(&_data->commandMsg, name, value, &_data->monitoringMsg);
+    ClientData::setAnalogIOValue(&_data->commandMsg, name, value, &_data->monitoringMsg);
 }
 
 //******************************************************************************
 void TransformationClient::setDigitalIOValue(const char* name, const unsigned long long value)
 {
-   ClientData::setDigitalIOValue(&_data->commandMsg, name, value, &_data->monitoringMsg);
+    ClientData::setDigitalIOValue(&_data->commandMsg, name, value, &_data->monitoringMsg);
 }
 
 //******************************************************************************
 bool TransformationClient::getBooleanIOValue(const char* name) const
 {
-   return ClientData::getBooleanIOValue(&_data->monitoringMsg, name).digitalValue != 0;
+    return ClientData::getBooleanIOValue(&_data->monitoringMsg, name).digitalValue != 0;
 }
 
 //******************************************************************************
 unsigned long long TransformationClient::getDigitalIOValue(const char* name) const
 {
-   return ClientData::getDigitalIOValue(&_data->monitoringMsg, name).digitalValue;
+    return ClientData::getDigitalIOValue(&_data->monitoringMsg, name).digitalValue;
 }
 
 //******************************************************************************
 double TransformationClient::getAnalogIOValue(const char* name) const
 {
-   return ClientData::getAnalogIOValue(&_data->monitoringMsg, name).analogValue;
+    return ClientData::getAnalogIOValue(&_data->monitoringMsg, name).analogValue;
 }
 
 //******************************************************************************

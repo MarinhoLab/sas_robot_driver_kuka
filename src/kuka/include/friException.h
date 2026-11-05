@@ -67,87 +67,83 @@ namespace KUKA
 {
 namespace FRI
 {
-   
-   /**
+
+/**
     * \brief Standard exception for the FRI Client
     * 
     * \note For realtime considerations the internal message buffer is static. 
     * So don't use this exception in more than one thread per process. 
     */
-   class FRIException
-   {
-         
-   public:
-      
-      /**
+class FRIException
+{
+public:
+    /**
        * \brief FRIException Constructor
        * 
        * @param message Error message
        */
-      FRIException(const char* message) 
-      { 
-         strncpy(_buffer, message, sizeof(_buffer) - 1);
-         _buffer[sizeof(_buffer) - 1] = 0; // ensure string termination
-         printf("FRIException: ");
-         printf(_buffer);
-         printf("\n");
-      }
-      
-      /**
+    FRIException(const char* message)
+    {
+        strncpy(_buffer, message, sizeof(_buffer) - 1);
+        _buffer[sizeof(_buffer) - 1] = 0;  // ensure string termination
+        printf("FRIException: ");
+        printf(_buffer);
+        printf("\n");
+    }
+
+    /**
        * \brief FRIException Constructor
        * 
        * @param message Error message which may contain one "%s" parameter 
        * @param param1 First format parameter for parameter message.
        */
-      FRIException(const char* message, const char* param1) 
-      {
+    FRIException(const char* message, const char* param1)
+    {
 #ifdef _MSC_VER
-         _snprintf( // visual studio compilers (up to VS 2013) only know this method
+        _snprintf(  // visual studio compilers (up to VS 2013) only know this method
 #else
-         snprintf(
+        snprintf(
 #endif
             _buffer, sizeof(_buffer), message, param1);
-         printf("FRIException: ");
-         printf(_buffer);
-         printf("\n");
-      }
-      
-      /**
+        printf("FRIException: ");
+        printf(_buffer);
+        printf("\n");
+    }
+
+    /**
        * \brief FRIException Constructor
        * 
        * @param message Error message which may contain two "%s" parameter 
        * @param param1 First format parameter for parameter message.
        * @param param2 Second format parameter for parameter message.
        */
-      FRIException(const char* message, const char* param1, const char* param2) 
-      {
+    FRIException(const char* message, const char* param1, const char* param2)
+    {
 #ifdef _MSC_VER
-         _snprintf( // visual studio compilers (up to VS 2013) only know this method
+        _snprintf(  // visual studio compilers (up to VS 2013) only know this method
 #else
-         snprintf(
+        snprintf(
 #endif
             _buffer, sizeof(_buffer), message, param1, param2);
-         printf("FRIException: ");
-         printf(_buffer);
-         printf("\n");
-      }
-      
-      /**
+        printf("FRIException: ");
+        printf(_buffer);
+        printf("\n");
+    }
+
+    /**
        * \brief Get error string.
        * @return Error message stored in the exception.
        */
-      const char* getErrorMessage() const { return _buffer; }
-      
-      /** \brief Virtual destructor. */
-      virtual ~FRIException() {}
-   
-   protected:
-      static char _buffer[1024];
-   
-   };
-   
-}
-}
+    const char* getErrorMessage() const { return _buffer; }
 
+    /** \brief Virtual destructor. */
+    virtual ~FRIException() {}
 
-#endif // _KUKA_FRI_EXCEPTION_H
+protected:
+    static char _buffer[1024];
+};
+
+}  // namespace FRI
+}  // namespace KUKA
+
+#endif  // _KUKA_FRI_EXCEPTION_H

@@ -26,12 +26,12 @@ typedef signed long long int64_t;
 typedef unsigned long long uint64_t;
 
 // from stdint.h
-#define INT8_MAX	0x7f
-#define INT16_MAX	0x7fff
-#define INT32_MAX	0x7fffffff
-#define UINT8_MAX	0xffU
-#define UINT16_MAX	0xffffU
-#define UINT32_MAX	0xffffffffU
+#define INT8_MAX 0x7f
+#define INT16_MAX 0x7fff
+#define INT32_MAX 0x7fffffff
+#define UINT8_MAX 0xffU
+#define UINT16_MAX 0xffffU
+#define UINT32_MAX 0xffffffffU
 #endif
 
 /* stddef.h subset */
@@ -41,7 +41,7 @@ typedef unsigned long long uint64_t;
 
 //typedef uint32_t size_t;  // wird dieser typedef wirklich benötigt?!?
 #ifndef offsetof
-#define offsetof(st, m) ((size_t)(&((st *)0)->m))
+#define offsetof(st, m) ((size_t)(&((st*)0)->m))
 #endif
 
 #ifndef NULL
@@ -68,8 +68,8 @@ typedef int bool;
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #else
-void *realloc(void *ptr, size_t size);
-void free(void *ptr);
+void* realloc(void* ptr, size_t size);
+void free(void* ptr);
 #endif
 #endif
 
@@ -80,33 +80,33 @@ void free(void *ptr);
 
 #ifndef WIN32
 /* Implementations are from the Public Domain C Library (PDCLib). */
-static size_t strlen( const char * s )
+static size_t strlen(const char* s)
 {
     size_t rc = 0;
-    while ( s[rc] )
+    while (s[rc])
     {
         ++rc;
     }
     return rc;
 }
 
-static void * memcpy( void *s1, const void *s2, size_t n )
+static void* memcpy(void* s1, const void* s2, size_t n)
 {
-    char * dest = (char *) s1;
-    const char * src = (const char *) s2;
-    while ( n-- )
+    char* dest = (char*)s1;
+    const char* src = (const char*)s2;
+    while (n--)
     {
         *dest++ = *src++;
     }
     return s1;
 }
 
-static void * memset( void * s, int c, size_t n )
+static void* memset(void* s, int c, size_t n)
 {
-    unsigned char * p = (unsigned char *) s;
-    while ( n-- )
+    unsigned char* p = (unsigned char*)s;
+    while (n--)
     {
-        *p++ = (unsigned char) c;
+        *p++ = (unsigned char)c;
     }
     return s;
 }

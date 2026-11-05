@@ -71,53 +71,49 @@ cost of any service and repair.
 #include <mutex>
 #include <Eigen/Core>
 
-
-
 /**
  * \brief Test client that can overlay interpolator joint positions with sine waves.
  */
 class LBRJointCommandOverlayClient : public KUKA::FRI::LBRClient
 {
-   
 public:
-      
-   LBRJointCommandOverlayClient() = default;
-   
-   ~LBRJointCommandOverlayClient();
-   
-   /**
+    LBRJointCommandOverlayClient() = default;
+
+    ~LBRJointCommandOverlayClient();
+
+    /**
     * \brief Callback for FRI state changes.
     * 
     * @param oldState
     * @param newState
     */
-   virtual void onStateChange(KUKA::FRI::ESessionState oldState, KUKA::FRI::ESessionState newState);
-   
-   /**
+    virtual void onStateChange(KUKA::FRI::ESessionState oldState, KUKA::FRI::ESessionState newState);
+
+    /**
     * \brief Callback for the FRI state 'Commanding Active'.
     */
-   virtual void command();
+    virtual void command();
 
-   Eigen::VectorXd get_measured_joint_values() const;
-   Eigen::VectorXd get_measured_joint_torques() const;
+    Eigen::VectorXd get_measured_joint_values() const;
+    Eigen::VectorXd get_measured_joint_torques() const;
 
-   using UpdateCallbackFunctionType = std::function<void(const std::vector<double>&) > ;
-   void set_target_joint_values(const Eigen::VectorXd &q);
-      
+    using UpdateCallbackFunctionType = std::function<void(const std::vector<double>&)>;
+    void set_target_joint_values(const Eigen::VectorXd& q);
+
 private:
-   
-   double _offset;         //!< offset for current interpolation step
-   std::vector<double> measured_joint_values_;
-   mutable std::mutex mutex_measured_joint_values_;
+    double _offset;  //!< offset for current interpolation step
+    std::vector<double> measured_joint_values_;
+    mutable std::mutex mutex_measured_joint_values_;
 
-   std::vector<double> previous_target_joint_values_;
-   std::vector<double> target_joint_values_;
-   mutable std::mutex mutex_target_joint_values_;
+    std::vector<double> previous_target_joint_values_;
+    std::vector<double> target_joint_values_;
+    mutable std::mutex mutex_target_joint_values_;
 
-   std::vector<double> measured_joint_torques_;
-   mutable std::mutex mutex_measured_joint_torques_;
+    std::vector<double> measured_joint_torques_;
+    mutable std::mutex mutex_measured_joint_torques_;
 };
 
-int communication_thread_loop(std::shared_ptr<LBRJointCommandOverlayClient> trafo_client, std::atomic_bool* break_loops, std::atomic_bool *connection_established);
+int communication_thread_loop(std::shared_ptr<LBRJointCommandOverlayClient> trafo_client, std::atomic_bool* break_loops,
+                              std::atomic_bool* connection_established);
 
-#endif // _KUKA_FRI_LBR_JOINT_COMMAND_OVERLAY_CLIENT_H
+#endif  // _KUKA_FRI_LBR_JOINT_COMMAND_OVERLAY_CLIENT_H

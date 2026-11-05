@@ -28,7 +28,6 @@
 #include <iostream>
 #include <memory>
 
-
 namespace sas
 {
 
@@ -37,31 +36,24 @@ class RobotDriverKuka::Impl
 public:
     std::shared_ptr<LBRJointCommandOverlayClient> trafo_client_;
 
-    Impl()
-    {
-        trafo_client_ = std::make_shared<LBRJointCommandOverlayClient>();
-    };
-
+    Impl() { trafo_client_ = std::make_shared<LBRJointCommandOverlayClient>(); };
 };
 
-RobotDriverKuka::RobotDriverKuka(const RobotDriverKukaConfiguration& configuration, std::atomic_bool* break_loops):
-RobotDriver(std::make_shared<marinholab::sas::core::ShutdownSignaler>(break_loops))
+RobotDriverKuka::RobotDriverKuka(const RobotDriverKukaConfiguration& configuration, std::atomic_bool* break_loops)
+    : RobotDriver(std::make_shared<marinholab::sas::core::ShutdownSignaler>(break_loops))
 {
     impl_ = std::make_unique<RobotDriverKuka::Impl>();
     joint_limits_ = configuration.joint_limits;
 }
 
-RobotDriverKuka::~RobotDriverKuka()
-{
-
-}
+RobotDriverKuka::~RobotDriverKuka() {}
 
 Eigen::VectorXd RobotDriverKuka::get_joint_positions()
 {
     return impl_->trafo_client_->get_measured_joint_values();
 }
 
-void RobotDriverKuka::set_target_joint_positions(const Eigen::VectorXd &desired_joint_positions_rad)
+void RobotDriverKuka::set_target_joint_positions(const Eigen::VectorXd& desired_joint_positions_rad)
 {
     impl_->trafo_client_->set_target_joint_values(desired_joint_positions_rad);
 }
@@ -73,7 +65,7 @@ Eigen::VectorXd RobotDriverKuka::get_joint_torques()
 
 void RobotDriverKuka::connect()
 {
-    std::atomic_bool connection_state(false); //Unknown connection state
+    std::atomic_bool connection_state(false);  //Unknown connection state
     fri_thread_ = std::thread(communication_thread_loop, impl_->trafo_client_, break_loops_, &connection_state);
 
     //Set the communication thread to be realtime with SCHED_FIFO.
@@ -81,7 +73,8 @@ void RobotDriverKuka::connect()
     int policy;
     pthread_getschedparam(fri_thread_.native_handle(), &policy, &sch);
     sch.sched_priority = 20;
-    if (pthread_setschedparam(fri_thread_.native_handle(), SCHED_FIFO, &sch)) {
+    if (pthread_setschedparam(fri_thread_.native_handle(), SCHED_FIFO, &sch))
+    {
         std::cout << "Failed to setschedparam: " << std::strerror(errno) << '\n';
     }
 
@@ -110,4 +103,4 @@ void RobotDriverKuka::deinitialize()
     //Nothing to do
 }
 
-}
+}  // namespace sas

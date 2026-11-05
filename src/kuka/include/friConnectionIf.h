@@ -60,49 +60,46 @@ cost of any service and repair.
 #ifndef _KUKA_FRI_CONNECTION_H
 #define _KUKA_FRI_CONNECTION_H
 
-
 /** Kuka namespace */
 namespace KUKA
 {
 namespace FRI
 {
-   
-   /**
+
+/**
     * \brief FRI connection interface. 
     * 
     * Connections to the KUKA Sunrise controller have to be implemented using
     * this interface.
     */
-   class IConnection
-   {
-   
-   public:
-      
-      /** \brief Virtual destructor. */
-      virtual ~IConnection() {}
-   
-      /**
+class IConnection
+{
+public:
+    /** \brief Virtual destructor. */
+    virtual ~IConnection() {}
+
+    /**
        * \brief Open a connection to the KUKA Sunrise controller.
        * 
        * @param port The port ID
        * @param remoteHost The address of the remote host
        * @return True if connection was established
        */
-      virtual bool open(int port, const char *remoteHost) = 0;
-   
-      /**
+    virtual bool open(int port, const char* remoteHost) = 0;
+
+    /**
        * \brief Close a connection to the KUKA Sunrise controller.
        */
-      virtual void close() = 0;
-      
-      /**
+    virtual void close() = 0;
+
+    /**
        * \brief Checks whether a connection to the KUKA Sunrise controller is established.
        * 
        * @return True if connection is established
        */
-      virtual bool isOpen() const = 0;
-   
-      /**
+    virtual bool isOpen() const = 0;
+
+    /**
        * \brief Receive a new FRI monitoring message from the KUKA Sunrise controller. 
        * 
        * This method blocks until a new message arrives.
@@ -110,21 +107,19 @@ namespace FRI
        * @param maxSize Size in bytes of the allocated buffer
        * @return Number of bytes received (0 when connection was terminated, negative in case of errors)
        */
-      virtual int receive(char *buffer, int maxSize) = 0;
-   
-      /**
+    virtual int receive(char* buffer, int maxSize) = 0;
+
+    /**
        * \brief Send a new FRI command message to the KUKA Sunrise controller.
        * 
        * @param buffer Pointer to the buffer holding the FRI message
        * @param size Size in bytes of the message to be send
        * @return True if successful
        */
-      virtual bool send(const char* buffer, int size) = 0;   
-   
-   };
-   
-}
-}
+    virtual bool send(const char* buffer, int size) = 0;
+};
 
+}  // namespace FRI
+}  // namespace KUKA
 
-#endif // _KUKA_FRI_CONNECTION_H
+#endif  // _KUKA_FRI_CONNECTION_H

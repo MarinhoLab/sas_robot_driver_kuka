@@ -61,73 +61,61 @@ cost of any service and repair.
 #include "friMonitoringMessageDecoder.h"
 #include "pb_decode.h"
 
-
 using namespace KUKA::FRI;
 
 //******************************************************************************
 MonitoringMessageDecoder::MonitoringMessageDecoder(FRIMonitoringMessage* pMessage, int num)
-   : m_nNum(num), m_pMessage(pMessage)
+    : m_nNum(num), m_pMessage(pMessage)
 {
-   initMessage();
+    initMessage();
 }
 
 //******************************************************************************
-MonitoringMessageDecoder::~MonitoringMessageDecoder()
-{
-
-}
+MonitoringMessageDecoder::~MonitoringMessageDecoder() {}
 
 //******************************************************************************
 void MonitoringMessageDecoder::initMessage()
 {
-   // set initial data
-   // it is assumed that no robot information and monitoring data is available and therefore the 
-   // optional fields are initialized with false
-   m_pMessage->has_robotInfo = false;
-   m_pMessage->has_monitorData = false;
-   m_pMessage->has_connectionInfo = true;
-   m_pMessage->has_ipoData = false;
-   m_pMessage->requestedTransformations_count = 0;
-   m_pMessage->has_endOfMessageData = false;
-   
-   
-   m_pMessage->header.messageIdentifier = 0;
-   m_pMessage->header.reflectedSequenceCounter = 0;
-   m_pMessage->header.sequenceCounter = 0;
+    // set initial data
+    // it is assumed that no robot information and monitoring data is available and therefore the
+    // optional fields are initialized with false
+    m_pMessage->has_robotInfo = false;
+    m_pMessage->has_monitorData = false;
+    m_pMessage->has_connectionInfo = true;
+    m_pMessage->has_ipoData = false;
+    m_pMessage->requestedTransformations_count = 0;
+    m_pMessage->has_endOfMessageData = false;
 
-   m_pMessage->connectionInfo.sessionState = FRISessionState_IDLE;
-   m_pMessage->connectionInfo.quality = FRIConnectionQuality_POOR;
+    m_pMessage->header.messageIdentifier = 0;
+    m_pMessage->header.reflectedSequenceCounter = 0;
+    m_pMessage->header.sequenceCounter = 0;
 
-   m_pMessage->monitorData.readIORequest_count = 0;
+    m_pMessage->connectionInfo.sessionState = FRISessionState_IDLE;
+    m_pMessage->connectionInfo.quality = FRIConnectionQuality_POOR;
 
-   // allocate and map memory for protobuf repeated structures
-   map_repeatedDouble(FRI_MANAGER_NANOPB_DECODE, m_nNum, 
-         &m_pMessage->monitorData.measuredJointPosition.value,
-         &m_tSendContainer.m_AxQMsrLocal);
-   
-   map_repeatedDouble(FRI_MANAGER_NANOPB_DECODE, m_nNum, 
-         &m_pMessage->monitorData.measuredTorque.value,
-         &m_tSendContainer.m_AxTauMsrLocal);
-   
-   map_repeatedDouble(FRI_MANAGER_NANOPB_DECODE, m_nNum, 
-         &m_pMessage->monitorData.commandedJointPosition.value,
-         &m_tSendContainer.m_AxQCmdT1mLocal);
-   
-   map_repeatedDouble(FRI_MANAGER_NANOPB_DECODE, m_nNum, 
-         &m_pMessage->monitorData.commandedTorque.value,
-         &m_tSendContainer.m_AxTauCmdLocal);
-   
-   map_repeatedDouble(FRI_MANAGER_NANOPB_DECODE, m_nNum, 
-         &m_pMessage->monitorData.externalTorque.value,
-         &m_tSendContainer.m_AxTauExtMsrLocal);
-   
-   map_repeatedDouble(FRI_MANAGER_NANOPB_DECODE,m_nNum,
-         &m_pMessage->ipoData.jointPosition.value,
-         &m_tSendContainer.m_AxQCmdIPO);
+    m_pMessage->monitorData.readIORequest_count = 0;
 
-   map_repeatedInt(FRI_MANAGER_NANOPB_DECODE, m_nNum, 
-         &m_pMessage->robotInfo.driveState,
-         &m_tSendContainer.m_AxDriveStateLocal);
+    // allocate and map memory for protobuf repeated structures
+    map_repeatedDouble(FRI_MANAGER_NANOPB_DECODE, m_nNum, &m_pMessage->monitorData.measuredJointPosition.value,
+                       &m_tSendContainer.m_AxQMsrLocal);
+
+    map_repeatedDouble(FRI_MANAGER_NANOPB_DECODE, m_nNum, &m_pMessage->monitorData.measuredTorque.value,
+                       &m_tSendContainer.m_AxTauMsrLocal);
+
+    map_repeatedDouble(FRI_MANAGER_NANOPB_DECODE, m_nNum, &m_pMessage->monitorData.commandedJointPosition.value,
+                       &m_tSendContainer.m_AxQCmdT1mLocal);
+
+    map_repeatedDouble(FRI_MANAGER_NANOPB_DECODE, m_nNum, &m_pMessage->monitorData.commandedTorque.value,
+                       &m_tSendContainer.m_AxTauCmdLocal);
+
+    map_repeatedDouble(FRI_MANAGER_NANOPB_DECODE, m_nNum, &m_pMessage->monitorData.externalTorque.value,
+                       &m_tSendContainer.m_AxTauExtMsrLocal);
+
+    map_repeatedDouble(FRI_MANAGER_NANOPB_DECODE, m_nNum, &m_pMessage->ipoData.jointPosition.value,
+                       &m_tSendContainer.m_AxQCmdIPO);
+
+    map_repeatedInt(FRI_MANAGER_NANOPB_DECODE, m_nNum, &m_pMessage->robotInfo.driveState,
+                    &m_tSendContainer.m_AxDriveStateLocal);
 }
 
 //******************************************************************************

@@ -62,60 +62,53 @@ cost of any service and repair.
 #include "friClientData.h"
 
 using namespace KUKA::FRI;
-char FRIException::_buffer[1024] = { 0 };
+char FRIException::_buffer[1024] = {0};
 
 //******************************************************************************
-LBRClient::LBRClient()
-{
-   
-}
+LBRClient::LBRClient() {}
 
 //******************************************************************************
-LBRClient::~LBRClient()
-{
-   
-}
+LBRClient::~LBRClient() {}
 
 //******************************************************************************
 void LBRClient::onStateChange(ESessionState oldState, ESessionState newState)
 {
-   // TODO: String converter function for states
-   //printf("LBRiiwaClient state changed from %d to %d\n", oldState, newState);
-   //M: Removed printf for better performance.
+    // TODO: String converter function for states
+    //printf("LBRiiwaClient state changed from %d to %d\n", oldState, newState);
+    //M: Removed printf for better performance.
 }
 
 //******************************************************************************
 void LBRClient::monitor()
 {
-   robotCommand().setJointPosition(robotState().getCommandedJointPosition());
+    robotCommand().setJointPosition(robotState().getCommandedJointPosition());
 }
 
 //******************************************************************************
 void LBRClient::waitForCommand()
 {
-   robotCommand().setJointPosition(robotState().getIpoJointPosition());
+    robotCommand().setJointPosition(robotState().getIpoJointPosition());
 }
 
 //******************************************************************************
 void LBRClient::command()
 {
-   robotCommand().setJointPosition(robotState().getIpoJointPosition());
+    robotCommand().setJointPosition(robotState().getIpoJointPosition());
 }
 
 //******************************************************************************
 ClientData* LBRClient::createData()
 {
-   ClientData* data = new ClientData(_robotState.NUMBER_OF_JOINTS);
-   
-   // link monitoring and command message to wrappers
-   _robotState._message = &data->monitoringMsg;
-   _robotCommand._cmdMessage = &data->commandMsg;
-   _robotCommand._monMessage = &data->monitoringMsg;
+    ClientData* data = new ClientData(_robotState.NUMBER_OF_JOINTS);
 
-   // set specific message IDs
-   data->expectedMonitorMsgID = _robotState.LBRMONITORMESSAGEID;
-   data->commandMsg.header.messageIdentifier = _robotCommand.LBRCOMMANDMESSAGEID;
-   
-   return data;
+    // link monitoring and command message to wrappers
+    _robotState._message = &data->monitoringMsg;
+    _robotCommand._cmdMessage = &data->commandMsg;
+    _robotCommand._monMessage = &data->monitoringMsg;
+
+    // set specific message IDs
+    data->expectedMonitorMsgID = _robotState.LBRMONITORMESSAGEID;
+    data->commandMsg.header.messageIdentifier = _robotCommand.LBRCOMMANDMESSAGEID;
+
+    return data;
 }
-

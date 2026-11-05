@@ -63,168 +63,157 @@ cost of any service and repair.
 
 using namespace KUKA::FRI;
 
-
-LBRState::LBRState():_message(0)
-{
-    
-}
+LBRState::LBRState() : _message(0) {}
 //******************************************************************************
 double LBRState::getSampleTime() const
 {
-   return _message->connectionInfo.sendPeriod * 0.001;
+    return _message->connectionInfo.sendPeriod * 0.001;
 }
 
 //******************************************************************************
 ESessionState LBRState::getSessionState() const
 {
-   return (ESessionState)_message->connectionInfo.sessionState;
+    return (ESessionState)_message->connectionInfo.sessionState;
 }
 
 //******************************************************************************
 EConnectionQuality LBRState::getConnectionQuality() const
 {
-   return (EConnectionQuality)_message->connectionInfo.quality;
+    return (EConnectionQuality)_message->connectionInfo.quality;
 }
 
 //******************************************************************************
 ESafetyState LBRState::getSafetyState() const
 {
-   return (ESafetyState)_message->robotInfo.safetyState;
+    return (ESafetyState)_message->robotInfo.safetyState;
 }
 
 //******************************************************************************
 EOperationMode LBRState::getOperationMode() const
 {
-   return (EOperationMode)_message->robotInfo.operationMode;
+    return (EOperationMode)_message->robotInfo.operationMode;
 }
 
 //******************************************************************************
 EDriveState LBRState::getDriveState() const
 {
-   tRepeatedIntArguments *values =
-         (tRepeatedIntArguments *)_message->robotInfo.driveState.arg;
-   int firstState = (int)values->value[0];
-   for (int i=1; i<NUMBER_OF_JOINTS; i++)
-   {
-      int state = (int)values->value[i];
-      if (state != firstState)
-      {
-         return TRANSITIONING;
-      }
-   }
-   return (EDriveState)firstState;
+    tRepeatedIntArguments* values = (tRepeatedIntArguments*)_message->robotInfo.driveState.arg;
+    int firstState = (int)values->value[0];
+    for (int i = 1; i < NUMBER_OF_JOINTS; i++)
+    {
+        int state = (int)values->value[i];
+        if (state != firstState)
+        {
+            return TRANSITIONING;
+        }
+    }
+    return (EDriveState)firstState;
 }
-
 
 //********************************************************************************
 EOverlayType LBRState::getOverlayType() const
 {
-   return (EOverlayType)_message->ipoData.overlayType;
+    return (EOverlayType)_message->ipoData.overlayType;
 }
 
 //********************************************************************************
 EClientCommandMode LBRState::getClientCommandMode() const
 {
-   return (EClientCommandMode)_message->ipoData.clientCommandMode;
+    return (EClientCommandMode)_message->ipoData.clientCommandMode;
 }
-
 
 //******************************************************************************
 EControlMode LBRState::getControlMode() const
 {
-   return (EControlMode)_message->robotInfo.controlMode;
+    return (EControlMode)_message->robotInfo.controlMode;
 }
 
 //******************************************************************************
 unsigned int LBRState::getTimestampSec() const
 {
-   return _message->monitorData.timestamp.sec;
+    return _message->monitorData.timestamp.sec;
 }
 
 //******************************************************************************
 unsigned int LBRState::getTimestampNanoSec() const
 {
-   return _message->monitorData.timestamp.nanosec;
+    return _message->monitorData.timestamp.nanosec;
 }
 
 //******************************************************************************
 const double* LBRState::getMeasuredJointPosition() const
 {
-   tRepeatedDoubleArguments *values =
-         (tRepeatedDoubleArguments*)_message->monitorData.measuredJointPosition.value.arg;
-   return (double*)values->value;
+    tRepeatedDoubleArguments* values = (tRepeatedDoubleArguments*)_message->monitorData.measuredJointPosition.value.arg;
+    return (double*)values->value;
 }
 
 //******************************************************************************
 const double* LBRState::getCommandedJointPosition() const
 {
-   tRepeatedDoubleArguments *values =
-            (tRepeatedDoubleArguments*)_message->monitorData.commandedJointPosition.value.arg;
-   return (double*)values->value;
+    tRepeatedDoubleArguments* values =
+        (tRepeatedDoubleArguments*)_message->monitorData.commandedJointPosition.value.arg;
+    return (double*)values->value;
 }
 
 //******************************************************************************
 const double* LBRState::getMeasuredTorque() const
 {
-   tRepeatedDoubleArguments *values =
-            (tRepeatedDoubleArguments*)_message->monitorData.measuredTorque.value.arg;
-   return (double*)values->value;
+    tRepeatedDoubleArguments* values = (tRepeatedDoubleArguments*)_message->monitorData.measuredTorque.value.arg;
+    return (double*)values->value;
 }
 
 //******************************************************************************
 const double* LBRState::getCommandedTorque() const
 {
-   tRepeatedDoubleArguments *values =
-            (tRepeatedDoubleArguments*)_message->monitorData.commandedTorque.value.arg;
-   return (double*)values->value;
+    tRepeatedDoubleArguments* values = (tRepeatedDoubleArguments*)_message->monitorData.commandedTorque.value.arg;
+    return (double*)values->value;
 }
 
 //******************************************************************************
 const double* LBRState::getExternalTorque() const
 {
-   tRepeatedDoubleArguments *values =
-            (tRepeatedDoubleArguments*)_message->monitorData.externalTorque.value.arg;
-   return (double*)values->value;
+    tRepeatedDoubleArguments* values = (tRepeatedDoubleArguments*)_message->monitorData.externalTorque.value.arg;
+    return (double*)values->value;
 }
 
 //******************************************************************************
 const double* LBRState::getIpoJointPosition() const
 {
-   if (!_message->ipoData.has_jointPosition)
-   {
-      throw FRIException("IPO joint position not available in monitoring mode.");
-      return NULL;
-   }
-   
-   tRepeatedDoubleArguments *values =
-            (tRepeatedDoubleArguments*)_message->ipoData.jointPosition.value.arg;
-   return (double*)values->value;
+    if (!_message->ipoData.has_jointPosition)
+    {
+        throw FRIException("IPO joint position not available in monitoring mode.");
+        return NULL;
+    }
+
+    tRepeatedDoubleArguments* values = (tRepeatedDoubleArguments*)_message->ipoData.jointPosition.value.arg;
+    return (double*)values->value;
 }
 
 //******************************************************************************
 double LBRState::getTrackingPerformance() const
 {
-   if (!_message->ipoData.has_trackingPerformance) return 0.0;
-   
-   return _message->ipoData.trackingPerformance;
+    if (!_message->ipoData.has_trackingPerformance)
+        return 0.0;
+
+    return _message->ipoData.trackingPerformance;
 }
 
 //******************************************************************************
 bool LBRState::getBooleanIOValue(const char* name) const
 {
-   return ClientData::getBooleanIOValue(_message, name).digitalValue != 0;
+    return ClientData::getBooleanIOValue(_message, name).digitalValue != 0;
 }
 
 //******************************************************************************
 unsigned long long LBRState::getDigitalIOValue(const char* name) const
 {
-   return ClientData::getDigitalIOValue(_message, name).digitalValue;
+    return ClientData::getDigitalIOValue(_message, name).digitalValue;
 }
 
 //******************************************************************************
 double LBRState::getAnalogIOValue(const char* name) const
 {
-   return ClientData::getAnalogIOValue(_message, name).analogValue;
+    return ClientData::getAnalogIOValue(_message, name).analogValue;
 }
 
 //******************************************************************************

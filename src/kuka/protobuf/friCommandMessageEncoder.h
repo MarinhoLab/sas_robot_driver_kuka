@@ -60,59 +60,53 @@ cost of any service and repair.
 #ifndef _KUKA_FRI_COMMANDMESSAGEENCODER_H
 #define _KUKA_FRI_COMMANDMESSAGEENCODER_H
 
-
 #include "FRIMessages.pb.h"
 #include "pb_frimessages_callbacks.h"
-
-
 
 namespace KUKA
 {
 namespace FRI
 {
 
-   static const int FRI_COMMAND_MSG_MAX_SIZE = 1500;   //!< max size of a FRI command message
+static const int FRI_COMMAND_MSG_MAX_SIZE = 1500;  //!< max size of a FRI command message
 
-   class CommandMessageEncoder
-   {
-      
-   public:
-      
-      CommandMessageEncoder(FRICommandMessage* pMessage, int num);
-      
-      ~CommandMessageEncoder();
-      
-      bool encode(char* buffer, int& size);
-      
-   private:
-      
-      struct LocalCommandDataContainer
-      {
-         tRepeatedDoubleArguments jointPosition;
-         tRepeatedDoubleArguments jointTorque;
-         
-         LocalCommandDataContainer()
-         {
+class CommandMessageEncoder
+{
+public:
+    CommandMessageEncoder(FRICommandMessage* pMessage, int num);
+
+    ~CommandMessageEncoder();
+
+    bool encode(char* buffer, int& size);
+
+private:
+    struct LocalCommandDataContainer
+    {
+        tRepeatedDoubleArguments jointPosition;
+        tRepeatedDoubleArguments jointTorque;
+
+        LocalCommandDataContainer()
+        {
             init_repeatedDouble(&jointPosition);
             init_repeatedDouble(&jointTorque);
-         }
-         
-         ~LocalCommandDataContainer()
-         {
+        }
+
+        ~LocalCommandDataContainer()
+        {
             free_repeatedDouble(&jointPosition);
             free_repeatedDouble(&jointTorque);
-         }
-      };
-      
-      int m_nNum;
-      
-      LocalCommandDataContainer m_tRecvContainer;
-      FRICommandMessage* m_pMessage;
-      
-      void initMessage();
-   };
-   
-}
-}
+        }
+    };
 
-#endif // _KUKA_FRI_COMMANDMESSAGEENCODER_H
+    int m_nNum;
+
+    LocalCommandDataContainer m_tRecvContainer;
+    FRICommandMessage* m_pMessage;
+
+    void initMessage();
+};
+
+}  // namespace FRI
+}  // namespace KUKA
+
+#endif  // _KUKA_FRI_COMMANDMESSAGEENCODER_H

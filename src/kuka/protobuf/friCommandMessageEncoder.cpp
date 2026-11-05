@@ -64,45 +64,39 @@ cost of any service and repair.
 using namespace KUKA::FRI;
 
 //******************************************************************************
-CommandMessageEncoder::CommandMessageEncoder(FRICommandMessage* pMessage, int num)
-   : m_nNum(num), m_pMessage(pMessage)
+CommandMessageEncoder::CommandMessageEncoder(FRICommandMessage* pMessage, int num) : m_nNum(num), m_pMessage(pMessage)
 {
-   initMessage();
+    initMessage();
 }
 
 //******************************************************************************
-CommandMessageEncoder::~CommandMessageEncoder()
-{
-
-}
+CommandMessageEncoder::~CommandMessageEncoder() {}
 
 //******************************************************************************
 void CommandMessageEncoder::initMessage()
 {
-   m_pMessage->has_commandData = false;
-   m_pMessage->has_endOfMessageData = false;
-   m_pMessage->commandData.has_jointPosition = false;
-   m_pMessage->commandData.has_cartesianWrenchFeedForward = false;
-   m_pMessage->commandData.has_jointTorque = false;
-   m_pMessage->commandData.commandedTransformations_count = 0;
-   m_pMessage->header.messageIdentifier = 0;
-   // init with 0. Necessary for creating the correct reflected sequence count in the monitoring msg
-   m_pMessage->header.sequenceCounter = 0;
-   m_pMessage->header.reflectedSequenceCounter = 0;
+    m_pMessage->has_commandData = false;
+    m_pMessage->has_endOfMessageData = false;
+    m_pMessage->commandData.has_jointPosition = false;
+    m_pMessage->commandData.has_cartesianWrenchFeedForward = false;
+    m_pMessage->commandData.has_jointTorque = false;
+    m_pMessage->commandData.commandedTransformations_count = 0;
+    m_pMessage->header.messageIdentifier = 0;
+    // init with 0. Necessary for creating the correct reflected sequence count in the monitoring msg
+    m_pMessage->header.sequenceCounter = 0;
+    m_pMessage->header.reflectedSequenceCounter = 0;
 
-   m_pMessage->commandData.writeIORequest_count = 0;
+    m_pMessage->commandData.writeIORequest_count = 0;
 
-   // allocate and map memory for protobuf repeated structures
-   map_repeatedDouble(FRI_MANAGER_NANOPB_ENCODE, m_nNum, 
-         &m_pMessage->commandData.jointPosition.value,
-         &m_tRecvContainer.jointPosition);
-   map_repeatedDouble(FRI_MANAGER_NANOPB_ENCODE, m_nNum, 
-         &m_pMessage->commandData.jointTorque.value,
-         &m_tRecvContainer.jointTorque);
-   
-   // nanopb encoding needs to know how many elements the static array contains
-   // a Cartesian wrench feed forward vector always contains 6 elements
-   m_pMessage->commandData.cartesianWrenchFeedForward.element_count = 6;
+    // allocate and map memory for protobuf repeated structures
+    map_repeatedDouble(FRI_MANAGER_NANOPB_ENCODE, m_nNum, &m_pMessage->commandData.jointPosition.value,
+                       &m_tRecvContainer.jointPosition);
+    map_repeatedDouble(FRI_MANAGER_NANOPB_ENCODE, m_nNum, &m_pMessage->commandData.jointTorque.value,
+                       &m_tRecvContainer.jointTorque);
+
+    // nanopb encoding needs to know how many elements the static array contains
+    // a Cartesian wrench feed forward vector always contains 6 elements
+    m_pMessage->commandData.cartesianWrenchFeedForward.element_count = 6;
 }
 
 //******************************************************************************

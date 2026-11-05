@@ -60,8 +60,6 @@ cost of any service and repair.
 #ifndef _KUKA_FRI_CLIENT_H
 #define _KUKA_FRI_CLIENT_H
 
-
-
 /** Kuka namespace */
 namespace KUKA
 {
@@ -69,134 +67,127 @@ namespace KUKA
 namespace FRI
 {
 
-   // forward declarations
-   struct ClientData;
-   
+// forward declarations
+struct ClientData;
 
-   /** \brief Enumeration of the FRI session state. */
-   enum ESessionState
-   {
-      IDLE = 0,               //!< no session available
-      MONITORING_WAIT = 1,    //!< monitoring mode with insufficient connection quality
-      MONITORING_READY = 2,   //!< monitoring mode with connection quality sufficient for command mode
-      COMMANDING_WAIT = 3,    //!< command mode about to start (overlay motion queued)
-      COMMANDING_ACTIVE = 4   //!< command mode active
-   };
+/** \brief Enumeration of the FRI session state. */
+enum ESessionState
+{
+    IDLE = 0,              //!< no session available
+    MONITORING_WAIT = 1,   //!< monitoring mode with insufficient connection quality
+    MONITORING_READY = 2,  //!< monitoring mode with connection quality sufficient for command mode
+    COMMANDING_WAIT = 3,   //!< command mode about to start (overlay motion queued)
+    COMMANDING_ACTIVE = 4  //!< command mode active
+};
 
-   /** \brief Enumeration of the FRI connection quality. */
-   enum EConnectionQuality
-   {
-      POOR = 0,               //!< poor connection quality
-      FAIR = 1,               //!< connection quality insufficient for command mode
-      GOOD = 2,               //!< connection quality sufficient for command mode
-      EXCELLENT = 3           //!< excellent connection quality
-   };
+/** \brief Enumeration of the FRI connection quality. */
+enum EConnectionQuality
+{
+    POOR = 0,      //!< poor connection quality
+    FAIR = 1,      //!< connection quality insufficient for command mode
+    GOOD = 2,      //!< connection quality sufficient for command mode
+    EXCELLENT = 3  //!< excellent connection quality
+};
 
-   /** \brief Enumeration of the controller's safety state. */
-   enum ESafetyState
-   {
-      NORMAL_OPERATION = 0,   //!< No safety stop request present.
-      SAFETY_STOP_LEVEL_0 = 1,//!< Safety stop request STOP0 or STOP1 present.
-      SAFETY_STOP_LEVEL_1 = 2,//!< Safety stop request STOP1 (on-path) present.
-      SAFETY_STOP_LEVEL_2 = 3 //!< Safety stop request STOP2 present.
-   };
+/** \brief Enumeration of the controller's safety state. */
+enum ESafetyState
+{
+    NORMAL_OPERATION = 0,     //!< No safety stop request present.
+    SAFETY_STOP_LEVEL_0 = 1,  //!< Safety stop request STOP0 or STOP1 present.
+    SAFETY_STOP_LEVEL_1 = 2,  //!< Safety stop request STOP1 (on-path) present.
+    SAFETY_STOP_LEVEL_2 = 3   //!< Safety stop request STOP2 present.
+};
 
-   /** \brief Enumeration of the controller's current mode of operation. */
-   enum EOperationMode
-   {
-      TEST_MODE_1 = 0,        //!< test mode 1 with reduced speed (T1)
-      TEST_MODE_2 = 1,        //!< test mode 2 (T2)
-      AUTOMATIC_MODE = 2      //!< automatic operation mode (AUT)
-   };
+/** \brief Enumeration of the controller's current mode of operation. */
+enum EOperationMode
+{
+    TEST_MODE_1 = 0,    //!< test mode 1 with reduced speed (T1)
+    TEST_MODE_2 = 1,    //!< test mode 2 (T2)
+    AUTOMATIC_MODE = 2  //!< automatic operation mode (AUT)
+};
 
-   /** \brief Enumeration of a drive's state. */
-   enum EDriveState
-   {
-      OFF = 0,                //!< drive is not being used
-      TRANSITIONING = 1,      //!< drive is in a transitioning state (before or after motion)
-      ACTIVE = 2              //!< drive is being actively commanded
-   };
-   
-   /** \brief Enumeration of control mode. */
-   enum EControlMode
-   {
-      POSITION_CONTROL_MODE = 0,  //!< position control mode
-      CART_IMP_CONTROL_MODE = 1,  //!< cartesian impedance control mode
-      JOINT_IMP_CONTROL_MODE = 2, //!< joint impedance control mode
-      NO_CONTROL = 3              //!< drives are not used
-   };
-   
-   
-   /** \brief Enumeration of the client command mode. */
-   enum EClientCommandMode
-   {
-      NO_COMMAND_MODE = 0,  //!< no client command mode available
-      POSITION = 1,   //!< commanding joint positions by the client
-      WRENCH = 2,     //!< commanding wrenches and joint positions by the client
-      TORQUE = 3      //!< commanding joint torques and joint positions by the client 
-   };
-   
-   /** \brief Enumeration of the overlay type. */
-   enum EOverlayType
-   {
-      NO_OVERLAY = 0,   //!< no overlay type available
-      JOINT = 1,        //!< joint overlay  
-      CARTESIAN = 2     //!< cartesian overlay
-   };
-   
-   
-   /**
+/** \brief Enumeration of a drive's state. */
+enum EDriveState
+{
+    OFF = 0,            //!< drive is not being used
+    TRANSITIONING = 1,  //!< drive is in a transitioning state (before or after motion)
+    ACTIVE = 2          //!< drive is being actively commanded
+};
+
+/** \brief Enumeration of control mode. */
+enum EControlMode
+{
+    POSITION_CONTROL_MODE = 0,   //!< position control mode
+    CART_IMP_CONTROL_MODE = 1,   //!< cartesian impedance control mode
+    JOINT_IMP_CONTROL_MODE = 2,  //!< joint impedance control mode
+    NO_CONTROL = 3               //!< drives are not used
+};
+
+/** \brief Enumeration of the client command mode. */
+enum EClientCommandMode
+{
+    NO_COMMAND_MODE = 0,  //!< no client command mode available
+    POSITION = 1,         //!< commanding joint positions by the client
+    WRENCH = 2,           //!< commanding wrenches and joint positions by the client
+    TORQUE = 3            //!< commanding joint torques and joint positions by the client
+};
+
+/** \brief Enumeration of the overlay type. */
+enum EOverlayType
+{
+    NO_OVERLAY = 0,  //!< no overlay type available
+    JOINT = 1,       //!< joint overlay
+    CARTESIAN = 2    //!< cartesian overlay
+};
+
+/**
     * \brief FRI client interface. 
     * 
     * This is the callback interface that should be implemented by FRI clients. 
     * Callbacks are automatically called by the client application
     * (ClientApplication) whenever new FRI messages arrive.
     */
-   class IClient
-   {
-      friend class ClientApplication;
-      
-   public:
-      
-      /** \brief Virtual destructor. */
-      virtual ~IClient() {}
-   
-      /** 
+class IClient
+{
+    friend class ClientApplication;
+
+public:
+    /** \brief Virtual destructor. */
+    virtual ~IClient() {}
+
+    /** 
        * \brief Callback that is called whenever the FRI session state changes.
        * 
        * @param oldState previous FRI session state
        * @param newState current FRI session state
        */
-      virtual void onStateChange(ESessionState oldState, ESessionState newState) = 0;
-   
-      /**
+    virtual void onStateChange(ESessionState oldState, ESessionState newState) = 0;
+
+    /**
        * \brief Callback for the FRI session states 'Monitoring Wait' and 'Monitoring Ready'.
        */
-      virtual void monitor() = 0;
-   
-      /**
+    virtual void monitor() = 0;
+
+    /**
        * \brief Callback for the FRI session state 'Commanding Wait'.
        */
-      virtual void waitForCommand() = 0;
-   
-      /**
+    virtual void waitForCommand() = 0;
+
+    /**
        * \brief Callback for the FRI session state 'Commanding'.
        */
-      virtual void command() = 0;
-      
-   protected:
-      
-      /**
+    virtual void command() = 0;
+
+protected:
+    /**
        * \brief Method to create and initialize the client data structure (used internally).
        * 
        * @return newly allocated client data structure
        */
-      virtual ClientData* createData() = 0;
-      
-   };
-   
-}
-}
+    virtual ClientData* createData() = 0;
+};
 
+}  // namespace FRI
+}  // namespace KUKA
 
-#endif // _KUKA_FRI_CLIENT_H
+#endif  // _KUKA_FRI_CLIENT_H

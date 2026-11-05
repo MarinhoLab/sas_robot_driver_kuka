@@ -69,10 +69,10 @@ namespace KUKA
 namespace FRI
 {
 
-	// forward declaration
-	struct ClientData;
+// forward declaration
+struct ClientData;
 
-   /**
+/**
     * \brief Abstract FRI transformation client. 
     * 
     * A transformation client enables the user to send transformation matrices cyclically to the 
@@ -86,25 +86,23 @@ namespace FRI
     * 
     * <b>This element is an undocumented internal feature. It is not intended to be used by applications as it might change or be removed in future versions.</b> 
     */
-   class TransformationClient
-   {
-      
-      friend class ClientApplication;
-     
-   public:
-      
-      /**
+class TransformationClient
+{
+    friend class ClientApplication;
+
+public:
+    /**
        * <br>  <b>This element is an undocumented internal feature. It is not intended to be used by applications as it might change or be removed in future versions.</b>  <br> 
        * \brief Constructor.
        **/
-      TransformationClient();
-      
-      /** <br> <b>This element is an undocumented internal feature. It is not intended to be used by applications as it might change or be removed in future versions.</b>   <br> 
+    TransformationClient();
+
+    /** <br> <b>This element is an undocumented internal feature. It is not intended to be used by applications as it might change or be removed in future versions.</b>   <br> 
        * \brief Virtual destructor. 
        **/
-      virtual ~TransformationClient();
-      
-      /** 
+    virtual ~TransformationClient();
+
+    /** 
        * <br>  <b>This element is an undocumented internal feature. It is not intended to be used by applications as it might change or be removed in future versions.</b>  <br>
        * \brief Callback which is called whenever a new FRI message arrives. 
        *
@@ -112,25 +110,25 @@ namespace FRI
        *  
        *  \see getRequestedTransformationIDs(), setTransformation()
        */
-      virtual void provide() = 0;
-      
-      /**
+    virtual void provide() = 0;
+
+    /**
        * \brief Get the sample time in seconds. 
        * 
        * This is the period in which the KUKA Sunrise controller is sending 
        * FRI packets.
        * @return sample time in seconds
        */
-      double getSampleTime() const; // sec
-      
-      /**
+    double getSampleTime() const;  // sec
+
+    /**
        * \brief Get the current FRI connection quality.
        * 
        * @return current FRI connection quality
        */
-      EConnectionQuality getConnectionQuality() const;      
+    EConnectionQuality getConnectionQuality() const;
 
-      /** 
+    /** 
        * <br>  <b>This element is an undocumented internal feature. It is not intended to be used by applications as it might change or be removed in future versions.</b>  <br>
        * \brief  Returns a vector of identifiers of all requested transformation matrices.
        * 
@@ -139,9 +137,9 @@ namespace FRI
        * 
        * @return reference to vector of IDs of requested transformations
        */
-      const std::vector<const char*>& getRequestedTransformationIDs() const;
-      
-      /** 
+    const std::vector<const char*>& getRequestedTransformationIDs() const;
+
+    /** 
        * <br>  <b>This element is an undocumented internal feature. It is not intended to be used by applications as it might change or be removed in future versions.</b>  <br>
        * 
        * \brief Get the timestamp of the current received FRI monitor message in Unix time. 
@@ -152,9 +150,9 @@ namespace FRI
        * 
        * @return timestamp encoded as Unix time (seconds)
        */
-      const unsigned int getTimestampSec() const;
-      
-      /** 
+    const unsigned int getTimestampSec() const;
+
+    /** 
        * <br>  <b>This element is an undocumented internal feature. It is not intended to be used by applications as it might change or be removed in future versions.</b>  <br>
        * \brief Get the nanoseconds elapsed since the last second (in Unix time).
        * 
@@ -163,9 +161,9 @@ namespace FRI
        * 
        * @return timestamp encoded as Unix time (nanoseconds part)
        */
-      const unsigned int getTimestampNanoSec() const;
-      
-      /**
+    const unsigned int getTimestampNanoSec() const;
+
+    /**
        * <br>  <b>This element is an undocumented internal feature. It is not intended to be used by applications as it might change or be removed in future versions.</b>  <br>
        * \brief Provides a requested transformation matrix.
        * 
@@ -188,10 +186,10 @@ namespace FRI
        * @param timeSec Timestamp encoded as Unix time (seconds)
        * @param timeNanoSec Timestamp encoded as Unix time (nanoseconds part)
        */
-      void setTransformation(const char* transformationID, const double transformationMatrix[3][4],
-            unsigned int timeSec, unsigned int timeNanoSec);
-      
-      /**
+    void setTransformation(const char* transformationID, const double transformationMatrix[3][4], unsigned int timeSec,
+                           unsigned int timeNanoSec);
+
+    /**
        * \brief Set boolean output value.
        * 
        * @throw FRIException Throws a FRIException if more outputs are set than can be registered. 
@@ -199,9 +197,9 @@ namespace FRI
        * @param name Full name of the IO (Syntax "IOGroupName.IOName").
        * @param value Boolean value to set. 
        */
-      void setBooleanIOValue(const char* name, const bool value);
-      
-      /**
+    void setBooleanIOValue(const char* name, const bool value);
+
+    /**
        * \brief Set digital output value.
        * 
        * @throw FRIException Throws a FRIException if more outputs are set than can be registered. 
@@ -209,9 +207,9 @@ namespace FRI
        * @param name Full name of the IO (Syntax "IOGroupName.IOName").
        * @param value Digital value to set. 
        */
-      void setDigitalIOValue(const char* name, const unsigned long long value);
-      
-      /**
+    void setDigitalIOValue(const char* name, const unsigned long long value);
+
+    /**
        * \brief Set analog output value.
        * 
        * @throw FRIException Throws a FRIException if more outputs are set than can be registered. 
@@ -219,49 +217,47 @@ namespace FRI
        * @param name Full name of the IO (Syntax "IOGroupName.IOName").
        * @param value Analog value to set. 
        */
-      void setAnalogIOValue(const char* name, const double value);  
-      
-      /**
+    void setAnalogIOValue(const char* name, const double value);
+
+    /**
        * \brief Get boolean IO value.
        *
        * @throw FRIException May throw an FRIException if the IO is of wrong type or unknown.
        * @param name Full name of the IO (Syntax "IOGroupName.IOName"). 
        * @return Returns IO's boolean value.
        */
-      bool getBooleanIOValue(const char* name) const;
-      
-      /**
+    bool getBooleanIOValue(const char* name) const;
+
+    /**
        * \brief Get digital IO value.
        *
        * @throw FRIException May throw an FRIException if the IO is of wrong type or unknown.
        * @param name Full name of the IO (Syntax "IOGroupName.IOName"). 
        * @return Returns IO's digital value.
        */
-      unsigned long long getDigitalIOValue(const char* name) const;
-      
-      /**
+    unsigned long long getDigitalIOValue(const char* name) const;
+
+    /**
        * \brief Get analog IO value.
        *
        * @throw FRIException May throw an FRIException if the IO is of wrong type or unknown.
        * @param name Full name of the IO (Syntax "IOGroupName.IOName"). 
        * @return Returns IO's analog value.
        */
-      double getAnalogIOValue(const char* name) const;
-      
-   private: 
-      
-      ClientData* _data;   //!< the client data structure
-            
-      /**
+    double getAnalogIOValue(const char* name) const;
+
+private:
+    ClientData* _data;  //!< the client data structure
+
+    /**
        * \brief Method to link the client data structure (used internally).
        * 
        * @param clientData the client data structure
        */
-      void linkData(ClientData* clientData);
-      
-   };
-   
-}
-}
+    void linkData(ClientData* clientData);
+};
 
-#endif // _KUKA_FRI_TRANSFORMATION_CLIENT_H
+}  // namespace FRI
+}  // namespace KUKA
+
+#endif  // _KUKA_FRI_TRANSFORMATION_CLIENT_H

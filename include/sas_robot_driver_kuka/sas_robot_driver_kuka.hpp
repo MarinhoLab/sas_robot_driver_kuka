@@ -29,7 +29,6 @@
 
 #include <sas_core/sas_robot_driver.hpp>
 
-
 namespace sas
 {
 //Declared internally
@@ -37,10 +36,10 @@ class DriverBcap;
 
 struct RobotDriverKukaConfiguration
 {
-    std::tuple<Eigen::VectorXd,Eigen::VectorXd> joint_limits;
+    std::tuple<Eigen::VectorXd, Eigen::VectorXd> joint_limits;
 };
 
-class RobotDriverKuka: public RobotDriver
+class RobotDriverKuka : public RobotDriver
 {
 private:
     RobotDriverKukaConfiguration configuration_;
@@ -49,10 +48,10 @@ private:
     //Implementation details that depend on FRI source files.
     class Impl;
     std::unique_ptr<Impl> impl_;
-public:
 
-    RobotDriverKuka(const RobotDriverKuka&)=delete;
-    RobotDriverKuka()=delete;
+public:
+    RobotDriverKuka(const RobotDriverKuka&) = delete;
+    RobotDriverKuka() = delete;
     ~RobotDriverKuka();
 
     RobotDriverKuka(const RobotDriverKukaConfiguration& configuration, std::atomic_bool* break_loops);
@@ -67,6 +66,5 @@ public:
 
     void initialize() override;
     void deinitialize() override;
-
 };
-}
+}  // namespace sas

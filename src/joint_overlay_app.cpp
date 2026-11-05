@@ -62,7 +62,7 @@ cost of any service and repair.
 **/
 #include <cstdlib>
 #include <cstdio>
-#include <cstring> // strstr
+#include <cstring>  // strstr
 #include <atomic>
 #include <iostream>
 #include <memory>
@@ -71,7 +71,7 @@ cost of any service and repair.
 #include "friUdpConnection.h"
 #include "friClientApplication.h"
 
-constexpr int DEFAULT_PORTID = 30200; //Original Kuka code had a define
+constexpr int DEFAULT_PORTID = 30200;  //Original Kuka code had a define
 using namespace KUKA::FRI;
 
 /**
@@ -82,42 +82,41 @@ using namespace KUKA::FRI;
  * @param break_loops
  * @return
  */
-int communication_thread_loop(std::shared_ptr<LBRJointCommandOverlayClient> trafo_client,
-                              std::atomic_bool* break_loops,
+int communication_thread_loop(std::shared_ptr<LBRJointCommandOverlayClient> trafo_client, std::atomic_bool* break_loops,
                               std::atomic_bool* connection_established)
 {
-   char* hostname = NULL;
-   int port = DEFAULT_PORTID;
+    char* hostname = NULL;
+    int port = DEFAULT_PORTID;
 
-   //Configuration
-   UdpConnection connection(1000);
-   ClientApplication app(connection, *trafo_client.get());
-   if (!app.connect(port, hostname))
-   {
-       std::cout << "Unable to connect to KUKA Sunrise controller" << std::endl;
-       break_loops->store(true);
-       connection_established->store(false);
-   }
-   connection_established->store(true);
+    //Configuration
+    UdpConnection connection(1000);
+    ClientApplication app(connection, *trafo_client.get());
+    if (!app.connect(port, hostname))
+    {
+        std::cout << "Unable to connect to KUKA Sunrise controller" << std::endl;
+        break_loops->store(true);
+        connection_established->store(false);
+    }
+    connection_established->store(true);
 
-   // repeatedly call the step routine to receive and process FRI packets
-   bool success = true;
-   while (success && !(*break_loops))
-   {
-      success = app.step();
-      
-      // check if we are in IDLE because the FRI session was closed
-      if (trafo_client->robotState().getSessionState() == IDLE)
-      {
-         // In this demo application we simply quit.
-         // Waiting for a new FRI session would be another possibility.
-         break;
-      }
-   }
-   break_loops->store(true);
+    // repeatedly call the step routine to receive and process FRI packets
+    bool success = true;
+    while (success && !(*break_loops))
+    {
+        success = app.step();
 
-   // disconnect from controller
-   app.disconnect();
-   
-   return 1;
+        // check if we are in IDLE because the FRI session was closed
+        if (trafo_client->robotState().getSessionState() == IDLE)
+        {
+            // In this demo application we simply quit.
+            // Waiting for a new FRI session would be another possibility.
+            break;
+        }
+    }
+    break_loops->store(true);
+
+    // disconnect from controller
+    app.disconnect();
+
+    return 1;
 }

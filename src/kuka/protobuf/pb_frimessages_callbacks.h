@@ -61,58 +61,56 @@ cost of any service and repair.
 #define _pb_frimessages_callbacks_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 #include "pb.h"
 #include "FRIMessages.pb.h"
 
-/** container for repeated double elements */
-typedef struct repeatedDoubleArguments {
-   size_t size;
-   size_t max_size;
-   double* value;
-} tRepeatedDoubleArguments;
+    /** container for repeated double elements */
+    typedef struct repeatedDoubleArguments
+    {
+        size_t size;
+        size_t max_size;
+        double* value;
+    } tRepeatedDoubleArguments;
 
-/** container for repeated integer elements */
-typedef struct repeatedIntArguments {
-   size_t size;
-   size_t max_size;
-   int64_t* value;
-} tRepeatedIntArguments;
+    /** container for repeated integer elements */
+    typedef struct repeatedIntArguments
+    {
+        size_t size;
+        size_t max_size;
+        int64_t* value;
+    } tRepeatedIntArguments;
 
-/** enumeration for direction (encoding/decoding) */
-typedef enum DIRECTION {
-   FRI_MANAGER_NANOPB_DECODE = 0, //!< Argument um eine 
-   FRI_MANAGER_NANOPB_ENCODE = 1  //!< 
-} eNanopbCallbackDirection;
+    /** enumeration for direction (encoding/decoding) */
+    typedef enum DIRECTION
+    {
+        FRI_MANAGER_NANOPB_DECODE = 0,  //!< Argument um eine
+        FRI_MANAGER_NANOPB_ENCODE = 1   //!<
+    } eNanopbCallbackDirection;
 
+    bool encode_repeatedDouble(pb_ostream_t* stream, const pb_field_t* field, void* const* arg);
 
-bool encode_repeatedDouble(pb_ostream_t *stream, const pb_field_t *field,
-      void * const *arg);
+    bool decode_repeatedDouble(pb_istream_t* stream, const pb_field_t* field, void** arg);
 
-bool decode_repeatedDouble(pb_istream_t *stream, const pb_field_t *field,
-      void **arg);
+    bool encode_repeatedInt(pb_ostream_t* stream, const pb_field_t* field, void* const* arg);
 
-bool encode_repeatedInt(pb_ostream_t *stream, const pb_field_t *field,
-      void * const *arg);
+    bool decode_repeatedInt(pb_istream_t* stream, const pb_field_t* field, void** arg);
 
-bool decode_repeatedInt(pb_istream_t *stream, const pb_field_t *field,
-      void **arg);
+    void map_repeatedDouble(eNanopbCallbackDirection dir, int numDOF, pb_callback_t* values,
+                            tRepeatedDoubleArguments* arg);
 
-void map_repeatedDouble(eNanopbCallbackDirection dir, int numDOF,
-      pb_callback_t *values, tRepeatedDoubleArguments *arg);
+    void map_repeatedInt(eNanopbCallbackDirection dir, int numDOF, pb_callback_t* values, tRepeatedIntArguments* arg);
 
-void map_repeatedInt(eNanopbCallbackDirection dir, int numDOF,
-      pb_callback_t *values, tRepeatedIntArguments *arg);
+    void init_repeatedDouble(tRepeatedDoubleArguments* arg);
 
-void init_repeatedDouble(tRepeatedDoubleArguments *arg);
+    void init_repeatedInt(tRepeatedIntArguments* arg);
 
-void init_repeatedInt(tRepeatedIntArguments *arg);
+    void free_repeatedDouble(tRepeatedDoubleArguments* arg);
 
-void free_repeatedDouble(tRepeatedDoubleArguments *arg);
-
-void free_repeatedInt(tRepeatedIntArguments *arg);
+    void free_repeatedInt(tRepeatedIntArguments* arg);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -69,143 +69,141 @@ using namespace KUKA::FRI;
 
 //******************************************************************************
 ClientApplication::ClientApplication(IConnection& connection, IClient& client)
-   : _connection(connection), _robotClient(&client),_trafoClient(NULL), _data(NULL)
+    : _connection(connection), _robotClient(&client), _trafoClient(NULL), _data(NULL)
 {
-   _data = _robotClient->createData();
+    _data = _robotClient->createData();
 }
 
 //******************************************************************************
 ClientApplication::ClientApplication(IConnection& connection, IClient& client, TransformationClient& trafoClient)
-   : _connection(connection), _robotClient(&client),_trafoClient(&trafoClient), _data(NULL)
+    : _connection(connection), _robotClient(&client), _trafoClient(&trafoClient), _data(NULL)
 {
-   _data = _robotClient->createData();
-   _trafoClient->linkData(_data);
+    _data = _robotClient->createData();
+    _trafoClient->linkData(_data);
 }
 
 //******************************************************************************
 ClientApplication::~ClientApplication()
 {
-   disconnect();
-   delete _data;
+    disconnect();
+    delete _data;
 }
 
 //******************************************************************************
-bool ClientApplication::connect(int port, const char *remoteHost)
+bool ClientApplication::connect(int port, const char* remoteHost)
 {
-   if (_connection.isOpen()) 
-   {
-      printf("Warning: client application already connected!\n");
-      return true;
-   }
-   
-   return _connection.open(port, remoteHost);
+    if (_connection.isOpen())
+    {
+        printf("Warning: client application already connected!\n");
+        return true;
+    }
+
+    return _connection.open(port, remoteHost);
 }
-   
+
 //******************************************************************************
 void ClientApplication::disconnect()
 {
-   if (_connection.isOpen()) _connection.close();
+    if (_connection.isOpen())
+        _connection.close();
 }
 
 //******************************************************************************
 bool ClientApplication::step()
 {
-   if (!_connection.isOpen())
-   {
-      printf("Error: client application is not connected!\n");
-      return false;
-   }
+    if (!_connection.isOpen())
+    {
+        printf("Error: client application is not connected!\n");
+        return false;
+    }
 
-   // **************************************************************************
-   // Receive and decode new monitoring message
-   // **************************************************************************
-   int size = _connection.receive(_data->receiveBuffer, FRI_MONITOR_MSG_MAX_SIZE);
-   
-   if (size <= 0)
-   {  // TODO: size == 0 -> connection closed (maybe go to IDLE instead of stopping?)
-      printf("Error: failed while trying to receive monitoring message!\n");
-      return false;
-   }
-   
-   if (!_data->decoder.decode(_data->receiveBuffer, size))
-   {
-      return false;
-   }
-   
-   // check message type (so that our wrappers match)
-   if (_data->expectedMonitorMsgID != _data->monitoringMsg.header.messageIdentifier)
-   {
-      printf("Error: incompatible IDs for received message (got: %d expected %d)!\n",
-            (int)_data->monitoringMsg.header.messageIdentifier,
-            (int)_data->expectedMonitorMsgID);
-      return false;
-   }   
-   
-   // **************************************************************************
-   // callbacks
-   // **************************************************************************
-   // reset commmand message before callbacks
-   _data->resetCommandMessage();
-   
-   // callbacks for robot client
-   ESessionState currentState = (ESessionState)_data->monitoringMsg.connectionInfo.sessionState;
-   
-   if (_data->lastState != currentState)
-   {
-      _robotClient->onStateChange(_data->lastState, currentState);
-      _data->lastState = currentState;
-   }
-   
-   switch (currentState)
-   {
-      case MONITORING_WAIT:
-      case MONITORING_READY:
-         _robotClient->monitor();
-         break;
-      case COMMANDING_WAIT:
-         _robotClient->waitForCommand();
-         break;
-      case COMMANDING_ACTIVE:
-         _robotClient->command();
-         break;
-      case IDLE:
-      default:
-         return true; // nothing to send back
-   }
+    // **************************************************************************
+    // Receive and decode new monitoring message
+    // **************************************************************************
+    int size = _connection.receive(_data->receiveBuffer, FRI_MONITOR_MSG_MAX_SIZE);
 
-   // callback for transformation client
-   if(_trafoClient != NULL)
-   {
-      _trafoClient->provide();
-   }
-   
-   // **************************************************************************
-   // Encode and send command message
-   // **************************************************************************
-   
-   _data->lastSendCounter++;
-   // check if its time to send an answer
-   if (_data->lastSendCounter >= _data->monitoringMsg.connectionInfo.receiveMultiplier)
-   {
-      _data->lastSendCounter = 0;
-      
-      // set sequence counters
-      _data->commandMsg.header.sequenceCounter = _data->sequenceCounter++;
-      _data->commandMsg.header.reflectedSequenceCounter = 
-            _data->monitoringMsg.header.sequenceCounter;
-      
-      if (!_data->encoder.encode(_data->sendBuffer, size))
-      {
-         return false;
-      }
-      
-      if (!_connection.send(_data->sendBuffer, size))
-      {
-         printf("Error: failed while trying to send command message!\n");
-         return false;
-      }
-   }
-   
-   return true;
+    if (size <= 0)
+    {  // TODO: size == 0 -> connection closed (maybe go to IDLE instead of stopping?)
+        printf("Error: failed while trying to receive monitoring message!\n");
+        return false;
+    }
+
+    if (!_data->decoder.decode(_data->receiveBuffer, size))
+    {
+        return false;
+    }
+
+    // check message type (so that our wrappers match)
+    if (_data->expectedMonitorMsgID != _data->monitoringMsg.header.messageIdentifier)
+    {
+        printf("Error: incompatible IDs for received message (got: %d expected %d)!\n",
+               (int)_data->monitoringMsg.header.messageIdentifier, (int)_data->expectedMonitorMsgID);
+        return false;
+    }
+
+    // **************************************************************************
+    // callbacks
+    // **************************************************************************
+    // reset commmand message before callbacks
+    _data->resetCommandMessage();
+
+    // callbacks for robot client
+    ESessionState currentState = (ESessionState)_data->monitoringMsg.connectionInfo.sessionState;
+
+    if (_data->lastState != currentState)
+    {
+        _robotClient->onStateChange(_data->lastState, currentState);
+        _data->lastState = currentState;
+    }
+
+    switch (currentState)
+    {
+        case MONITORING_WAIT:
+        case MONITORING_READY:
+            _robotClient->monitor();
+            break;
+        case COMMANDING_WAIT:
+            _robotClient->waitForCommand();
+            break;
+        case COMMANDING_ACTIVE:
+            _robotClient->command();
+            break;
+        case IDLE:
+        default:
+            return true;  // nothing to send back
+    }
+
+    // callback for transformation client
+    if (_trafoClient != NULL)
+    {
+        _trafoClient->provide();
+    }
+
+    // **************************************************************************
+    // Encode and send command message
+    // **************************************************************************
+
+    _data->lastSendCounter++;
+    // check if its time to send an answer
+    if (_data->lastSendCounter >= _data->monitoringMsg.connectionInfo.receiveMultiplier)
+    {
+        _data->lastSendCounter = 0;
+
+        // set sequence counters
+        _data->commandMsg.header.sequenceCounter = _data->sequenceCounter++;
+        _data->commandMsg.header.reflectedSequenceCounter = _data->monitoringMsg.header.sequenceCounter;
+
+        if (!_data->encoder.encode(_data->sendBuffer, size))
+        {
+            return false;
+        }
+
+        if (!_connection.send(_data->sendBuffer, size))
+        {
+            printf("Error: failed while trying to send command message!\n");
+            return false;
+        }
+    }
+
+    return true;
 }
-
