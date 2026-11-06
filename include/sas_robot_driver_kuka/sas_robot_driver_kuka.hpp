@@ -54,7 +54,8 @@ public:
     RobotDriverKuka() = delete;
     ~RobotDriverKuka();
 
-    RobotDriverKuka(const RobotDriverKukaConfiguration& configuration, std::atomic_bool* break_loops);
+    RobotDriverKuka(const RobotDriverKukaConfiguration& configuration,
+                    const std::shared_ptr<marinholab::sas::core::ShutdownSignaler>& shutdown_signaler);
 
     Eigen::VectorXd get_joint_positions() override;
     void set_target_joint_positions(const Eigen::VectorXd& desired_joint_positions_rad) override;

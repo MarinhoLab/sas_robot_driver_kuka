@@ -39,8 +39,9 @@ public:
     Impl() { trafo_client_ = std::make_shared<LBRJointCommandOverlayClient>(); };
 };
 
-RobotDriverKuka::RobotDriverKuka(const RobotDriverKukaConfiguration& configuration, std::atomic_bool* break_loops)
-    : RobotDriver(std::make_shared<marinholab::sas::core::ShutdownSignaler>(break_loops))
+RobotDriverKuka::RobotDriverKuka(const RobotDriverKukaConfiguration& configuration,
+                                 const std::shared_ptr<marinholab::sas::core::ShutdownSignaler>& shutdown_signaler)
+    : RobotDriver(shutdown_signaler)
 {
     impl_ = std::make_unique<RobotDriverKuka::Impl>();
     joint_limits_ = configuration.joint_limits;
@@ -66,7 +67,7 @@ Eigen::VectorXd RobotDriverKuka::get_joint_torques()
 void RobotDriverKuka::connect()
 {
     std::atomic_bool connection_state(false);  //Unknown connection state
-    fri_thread_ = std::thread(communication_thread_loop, impl_->trafo_client_, break_loops_, &connection_state);
+    fri_thread_ = std::thread(communication_thread_loop, impl_->trafo_client_, shutdown_signaler_, &connection_state);
 
     //Set the communication thread to be realtime with SCHED_FIFO.
     sched_param sch;
@@ -80,14 +81,14 @@ void RobotDriverKuka::connect()
 
     //We need the connection to be established before moving on.
     //However, we guarantee that this doesn't lock us with break_loops.
-    while (!(*break_loops_) && !connection_state)
+    while (!shutdown_signaler_->should_shutdown() && !connection_state)
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
 
 void RobotDriverKuka::disconnect()
 {
     //To force the thread to shutdown if it hasn't already done so
-    *break_loops_ = true;
+    shutdown_signaler_->shutdown();
 
     if (fri_thread_.joinable())
         fri_thread_.join();

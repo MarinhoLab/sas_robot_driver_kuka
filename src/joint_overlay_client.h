@@ -65,6 +65,7 @@ cost of any service and repair.
 
 #include "friLBRClient.h"
 #include <atomic>
+#include <marinholab/sas/core/sas_shutdown_signaler.hpp>
 #include <memory>
 #include <vector>
 #include <functional>
@@ -113,7 +114,7 @@ private:
     mutable std::mutex mutex_measured_joint_torques_;
 };
 
-int communication_thread_loop(std::shared_ptr<LBRJointCommandOverlayClient> trafo_client, std::atomic_bool* break_loops,
+int communication_thread_loop(std::shared_ptr<LBRJointCommandOverlayClient> trafo_client, std::shared_ptr<marinholab::sas::core::ShutdownSignaler> shutdown_signaler,
                               std::atomic_bool* connection_established);
 
 #endif  // _KUKA_FRI_LBR_JOINT_COMMAND_OVERLAY_CLIENT_H

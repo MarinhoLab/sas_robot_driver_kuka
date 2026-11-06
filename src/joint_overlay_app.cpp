@@ -79,10 +79,11 @@ using namespace KUKA::FRI;
  * derivatives is unconventional for the library itself but quite common for robotics
  * in general. The loop needs to be managed by a separate thread that idealy is completely
  * transparent to other programs.
- * @param break_loops
+ * @param shutdown_signaler
  * @return
  */
-int communication_thread_loop(std::shared_ptr<LBRJointCommandOverlayClient> trafo_client, std::atomic_bool* break_loops,
+int communication_thread_loop(std::shared_ptr<LBRJointCommandOverlayClient> trafo_client,
+                              std::shared_ptr<marinholab::sas::core::ShutdownSignaler> shutdown_signaler,
                               std::atomic_bool* connection_established)
 {
     char* hostname = NULL;
@@ -94,14 +95,14 @@ int communication_thread_loop(std::shared_ptr<LBRJointCommandOverlayClient> traf
     if (!app.connect(port, hostname))
     {
         std::cout << "Unable to connect to KUKA Sunrise controller" << std::endl;
-        break_loops->store(true);
+        shutdown_signaler->shutdown();
         connection_established->store(false);
     }
     connection_established->store(true);
 
     // repeatedly call the step routine to receive and process FRI packets
     bool success = true;
-    while (success && !(*break_loops))
+    while (success && !shutdown_signaler->should_shutdown())
     {
         success = app.step();
 
@@ -113,7 +114,7 @@ int communication_thread_loop(std::shared_ptr<LBRJointCommandOverlayClient> traf
             break;
         }
     }
-    break_loops->store(true);
+    shutdown_signaler->shutdown();
 
     // disconnect from controller
     app.disconnect();

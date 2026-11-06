@@ -72,12 +72,12 @@ int main(int argc, char** argv)
         RCLCPP_INFO_STREAM_ONCE(node->get_logger(), "::Parameters OK.");
 
         RCLCPP_INFO_STREAM_ONCE(node->get_logger(), "::Instantiating RobotDriverKuka.");
-        auto robot_driver_kuka = std::make_shared<sas::RobotDriverKuka>(configuration, &kill_this_process);
+        auto shutdown_signaler = std::make_shared<marinholab::sas::core::ShutdownSignaler>(&kill_this_process);
+        auto robot_driver_kuka = std::make_shared<sas::RobotDriverKuka>(configuration, shutdown_signaler);
 
         RCLCPP_INFO_STREAM_ONCE(node->get_logger(), "::Instantiating RobotDriverROS.");
-        sas::RobotDriverROS robot_driver_ros(
-            node, robot_driver_kuka, robot_driver_ros_configuration,
-            std::make_shared<marinholab::sas::core::ShutdownSignaler>(&kill_this_process));
+        sas::RobotDriverROS robot_driver_ros(node, robot_driver_kuka, robot_driver_ros_configuration,
+                                             shutdown_signaler);
         robot_driver_ros.control_loop();
     }
     catch (const std::exception& e)
