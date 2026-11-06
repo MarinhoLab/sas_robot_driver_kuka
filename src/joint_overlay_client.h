@@ -114,7 +114,8 @@ private:
     mutable std::mutex mutex_measured_joint_torques_;
 };
 
-int communication_thread_loop(std::shared_ptr<LBRJointCommandOverlayClient> trafo_client, std::shared_ptr<marinholab::sas::core::ShutdownSignaler> shutdown_signaler,
+int communication_thread_loop(std::shared_ptr<LBRJointCommandOverlayClient> trafo_client,
+                              std::shared_ptr<marinholab::sas::core::ShutdownSignaler> shutdown_signaler,
                               std::atomic_bool* connection_established);
 
 #endif  // _KUKA_FRI_LBR_JOINT_COMMAND_OVERLAY_CLIENT_H
